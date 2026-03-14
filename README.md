@@ -1,5 +1,19 @@
 ![image](https://media.forgecdn.net/attachments/description/null/description_00e4c902-0376-49f9-9654-c572b118a7d2.png)
 
+
+<p align="center">
+  <a href="https://modrinth.com/mod/simple-enemy">
+    <img alt="modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg">
+  </a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/tacz-simple-enemy">
+    <img alt="curseforge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg">
+  </a>
+  <a href="https://github.com/NekoYuni/Simple-Enemy-Mod-Public">
+    <img alt="github" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy-minimal/available/github_vector.svg">
+  </a>
+</p>
+
+
 ***
 
 ![image](https://media.forgecdn.net/attachments/description/null/description_825149a3-bc69-4274-91f0-252ce64c97aa.png)
