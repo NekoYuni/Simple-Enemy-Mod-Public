@@ -1,0 +1,28 @@
+{
+
+  "entity.simpleenemymod.ruunit": "RU Unit",
+  "entity.simpleenemymod.usunit": "US Unit",
+  "entity.simpleenemymod.pmcunit": "PMC Unit",
+
+  "item.simpleenemymod.us_unit_spawn_egg": "US Unit Spawn Egg",
+  "item.simpleenemymod.us_squad_leader_spawn_egg": "US Squad Leader Spawn Egg",
+  "item.simpleenemymod.us_squad_unit_spawn_egg": "US Squad Unit Spawn Egg",
+
+  "item.simpleenemymod.ru_unit_spawn_egg": "RU Unit Spawn Egg",
+  "item.simpleenemymod.ru_squad_leader_spawn_egg": "RU Squad Leader Spawn Egg",
+  "item.simpleenemymod.ru_squad_unit_spawn_egg": "RU Squad Unit Spawn Egg",
+
+  "item.simpleenemymod.pmc_unit_spawn_egg": "PMC Unit Spawn Egg",
+  "item.simpleenemymod.pmc_squad_leader_spawn_egg": "PMC Squad Leader Spawn Egg",
+  "item.simpleenemymod.pmc_squad_unit_spawn_egg": "PMC Squad Unit Spawn Egg",
+
+  "item.simpleenemymod.recruit_table": "Recruit Table",
+  "block.simpleenemymod.recruit_table": "Recruit Table",
+
+  "creativeTab.simple_enemy_mod_tab": "Simple Enemy Mod",
+
+  "key.category.simpleenemymod.general": "Simple Enemy Mod",
+  "key.simpleenemymod.commander_menu": "Open Commander Menu"
+
+
+}

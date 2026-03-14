@@ -1,0 +1,11 @@
+{
+  "entities": [
+    "simpleenemymod:pmcunit"
+  ],
+  "slots": [
+    "head",
+    "back",
+    "body",
+    "belt"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "loadouts": {
+    "m4a1": {
+      "gun_id": "tacz:m4a1",
+      "ammo_count": 30,
+      "fire_mode": "SEMI",
+      "scope_id": "tacz:scope_acog_ta31"
+    },
+
+    "m249": {
+      "gun_id": "tacz:m249",
+      "ammo_count": 75,
+      "fire_mode": "AUTO",
+      "scope_id": "tacz:scope_acog_ta31"
+    },
+
+    "scar_l": {
+      "gun_id": "tacz:scar_l",
+      "ammo_count": 30,
+      "fire_mode": "SEMI",
+      "scope_id": "tacz:scope_acog_ta31"
+    }
+  }
+}
