@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "simpleenemymod:block/recruit_table_side_3",
+    "side": "simpleenemymod:block/recruit_table_side_3",
+    "top": "simpleenemymod:block/recruit_table_top",
+    "bottom": "simpleenemymod:block/recruit_table_bottom"
+  },
+
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "rotation": 180
+        },
+
+        "down": {
+          "texture": "#bottom"
+        },
+
+        "north": {
+          "texture": "#front"
+        },
+
+        "south": {
+          "texture": "#side"
+        },
+
+        "west": {
+          "texture": "#side",
+          "uv": [16, 0, 0, 16]
+        },
+
+        "east": {
+          "texture": "#side",
+          "uv": [16, 0, 0, 16]
+        }
+      }
+
+    }
+
+  ]
+}

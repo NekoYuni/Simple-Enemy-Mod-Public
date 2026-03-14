@@ -1,0 +1,24 @@
+{
+  "loadouts": {
+    "rpk": {
+      "gun_id": "tacz:rpk",
+      "ammo_count": 40,
+      "fire_mode": "AUTO",
+      "scope_id": "tacz:sight_t2",
+      "muzzle_id": "tacz:muzzle_silencer_ursus"
+    },
+
+    "type_81": {
+      "gun_id": "tacz:type_81",
+      "ammo_count": 30,
+      "fire_mode": "SEMI"
+    },
+
+    "ak47": {
+      "gun_id": "tacz:ak47",
+      "ammo_count": 30,
+      "fire_mode": "SEMI",
+      "scope_id": "tacz:sight_t2"
+    }
+  }
+}

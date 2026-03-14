@@ -1,0 +1,82 @@
+{
+  "sound_us_unit_hurt":{
+    "subtitle": "subtiltes.simpleenemymod.sound_us_unit_hurt",
+    "sounds": [
+      "simpleenemymod:entity/us_unit/sound_us_unit_hurt",
+      "simpleenemymod:entity/us_unit/sound_us_unit_hurt1"
+
+    ]
+  },
+  "sound_us_unit_death":{
+    "subtitle": "subtiltes.simpleenemymod.sound_us_unit_death",
+    "sounds": [
+      "simpleenemymod:entity/us_unit/sound_us_unit_death",
+      "simpleenemymod:entity/us_unit/sound_us_unit_death1"
+
+    ]
+
+  },
+  "sound_us_unit_alert":{
+    "subtitle": "subtiltes.simpleenemymod.sound_us_unit_alert",
+    "sounds": [
+      "simpleenemymod:entity/us_unit/sound_us_unit_alert",
+      "simpleenemymod:entity/us_unit/sound_us_unit_alert1",
+      "simpleenemymod:entity/us_unit/sound_us_unit_alert2"
+
+    ]
+
+  },
+  "sound_us_unit_warning":{
+    "subtitle": "subtiltes.simpleenemymod.sound_us_unit_warning",
+    "sounds": [
+      "simpleenemymod:entity/us_unit/sound_us_unit_warning"
+
+    ]
+
+  },
+
+  "sound_ru_unit_death":{
+    "subtitle": "subtiltes.simpleenemymod.sound_ru_unit_death",
+    "sounds": [
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_death"
+
+    ]
+
+  },
+  "sound_ru_unit_hurt":{
+    "subtitle": "subtiltes.simpleenemymod.sound_ru_unit_hurt",
+    "sounds": [
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_hurt",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_hurt1",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_hurt2",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_hurt3",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_hurt4"
+
+    ]
+
+  },
+  "sound_ru_unit_alert":{
+    "subtitle": "subtiltes.simpleenemymod.sound_ru_unit_alert",
+    "sounds": [
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_alert",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_alert1",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_alert2",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_alert3",
+      "simpleenemymod:entity/ru_unit/sound_ru_unit_alert4"
+
+    ]
+
+  },
+  "sound_bullet_impact":{
+    "subtitle": "subtiltes.simpleenemymod.sound_bullet_impact",
+    "sounds": [
+      "simpleenemymod:bullet/sound_bullet_impact1",
+      "simpleenemymod:bullet/sound_bullet_impact2",
+      "simpleenemymod:bullet/sound_bullet_impact3",
+      "simpleenemymod:bullet/sound_bullet_impact4",
+      "simpleenemymod:bullet/sound_bullet_impact5",
+      "simpleenemymod:bullet/sound_bullet_impact6"
+    ]
+
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "simpleenemymod:block/recruit_table" },
+    "facing=south": { "model": "simpleenemymod:block/recruit_table", "y": 180 },
+    "facing=west":  { "model": "simpleenemymod:block/recruit_table", "y": 270 },
+    "facing=east":  { "model": "simpleenemymod:block/recruit_table", "y": 90 }
+  }
+}
