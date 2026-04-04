@@ -13,6 +13,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.VerticalAwareTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.equipment.UsWeaponEquipper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.registry.ModSounds;
@@ -60,6 +61,8 @@ public class USunitEntity extends AbstractUnit {
     @Override
     public void setupRoleGoals() {
 
+        double vRange = 32.0; // Add to the config
+
         this.goalSelector.removeAllGoals(pGoal -> true);
         this.targetSelector.removeAllGoals(pGoal -> true);
 
@@ -67,20 +70,33 @@ public class USunitEntity extends AbstractUnit {
             this.setRole(UnitRole.DEFAULT);
         }
 
-
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(USunitEntity.class).setUnseenMemoryTicks(600));
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(
+                this).setAlertOthers(USunitEntity.class).setUnseenMemoryTicks(600));
 
         if (!CommonConfig.US_UNITS_FRIENDLY.get()) {
-            this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PmcUnitEntity.class, true).setUnseenMemoryTicks(800));
-            this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(800));
+
+            this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                    this, PmcUnitEntity.class, true, vRange).setUnseenMemoryTicks(800));
+
+            this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                    this, Player.class, true, vRange).setUnseenMemoryTicks(800));
+
         }
 
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, RUunitEntity.class, true).setUnseenMemoryTicks(800));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Skeleton.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(
+                this, RUunitEntity.class, true).setUnseenMemoryTicks(800));
 
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, true, (target) -> {
+        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
+                this, Zombie.class, true, vRange)); // Testing
+
+        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
+                this, Skeleton.class, true, vRange));
+
+        this.targetSelector.addGoal(4, new VerticalAwareTargetGoal<>(
+                this, IronGolem.class, true, vRange));
+
+        this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                this, Monster.class, true, vRange, (target) -> {
 
             if (target.getClass() == this.getClass()) {
                 return false;

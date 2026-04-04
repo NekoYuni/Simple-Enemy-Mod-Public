@@ -29,6 +29,7 @@ import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.AttackSpecificTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.CommanderOrderGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.NoPlayerHurtByTargetGoal;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.VerticalAwareTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.ICommandableMob;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.OrderType;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
@@ -191,6 +192,8 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
     @Override
     public void setupRoleGoals() {
 
+        double vRange = 32.0; // Add to the config value
+
         this.goalSelector.removeAllGoals(pGoal -> true);
         this.targetSelector.removeAllGoals(pGoal -> true);
 
@@ -205,21 +208,32 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
         java.util.function.Predicate<LivingEntity> fireFilter = (target) -> this.isFireAllowed();
 
 
-        this.targetSelector.addGoal(1, new NoPlayerHurtByTargetGoal(this).setAlertOthers().setUnseenMemoryTicks(600));
+        this.targetSelector.addGoal(1, new NoPlayerHurtByTargetGoal(
+                this).setAlertOthers().setUnseenMemoryTicks(600));
 
+        // Friendlies
         if (!CommonConfig.US_UNITS_FRIENDLY.get()) {
-            this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, USunitEntity.class, true, fireFilter).setUnseenMemoryTicks(800));
+            this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                    this, USunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
         }
 
         if (!CommonConfig.RU_UNITS_FRIENDLY.get()) {
-            this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, RUunitEntity.class, true, fireFilter).setUnseenMemoryTicks(800));
+            this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                    this, RUunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
         }
 
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Zombie.class, true, fireFilter));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Skeleton.class, true, fireFilter));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractIllager.class, true, fireFilter));
+        // Normal Goals
+        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
+                this, Zombie.class, true, vRange, fireFilter));
 
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, true, (target) -> {
+        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
+                this, Skeleton.class, true, vRange, fireFilter));
+
+        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
+                this, AbstractIllager.class, true, vRange, fireFilter));
+
+        this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
+                this, Monster.class, true, vRange, (target) -> {
 
             if (target.getClass() == this.getClass()) {
                 return false;
