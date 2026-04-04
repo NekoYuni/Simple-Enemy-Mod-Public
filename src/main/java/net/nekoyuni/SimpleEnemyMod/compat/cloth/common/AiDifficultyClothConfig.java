@@ -12,21 +12,19 @@ public class AiDifficultyClothConfig {
 
     public static void setup(ConfigBuilder builder, ConfigEntryBuilder entryBuilder) {
 
-        ConfigCategory difficulty = builder.getOrCreateCategory(Component.literal("Difficulty"));
+        ConfigCategory difficulty = builder.getOrCreateCategory(Component.translatable("config.simpleenemymod.cat.difficulty"));
 
         difficulty.addEntry(entryBuilder.startTextDescription(
-                Component.literal("AI Difficulty preset.\nDoes NOT affect soldiers accuracy. " +
-                                "Only affects tactical maneuver timers and movement speeds.\n\nNORMAL:" +
-                                " More static soldiers, slower combat pacing.\nADVANCED: More dynamic and aggressive soldiers.")
+                Component.translatable("config.simpleenemymod.difficulty.description")
                         .withStyle(ChatFormatting.GRAY)
         ).build());
 
         difficulty.addEntry(entryBuilder.startEnumSelector(
-                        Component.literal("AI Difficulty"),
+                        Component.translatable("config.simpleenemymod.difficulty"),
                         CommonConfig.AIDifficulty.class,
                         CommonConfig.DIFFICULTY.get())
                 .setDefaultValue(CommonConfig.AIDifficulty.NORMAL)
-                .setSaveConsumer(newValue -> CommonConfig.DIFFICULTY.set(newValue)) // ESCRITURA
+                .setSaveConsumer(newValue -> CommonConfig.DIFFICULTY.set(newValue))
                 .build());
 
     }

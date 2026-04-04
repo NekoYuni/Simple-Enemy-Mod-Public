@@ -10,17 +10,21 @@ public class FactionClothConfig {
 
     public static void setup (ConfigBuilder builder, ConfigEntryBuilder entryBuilder) {
 
-        ConfigCategory faction = builder.getOrCreateCategory(Component.literal("Factions"));
+        ConfigCategory faction = builder.getOrCreateCategory(Component.translatable("config.simpleenemymod.cat.factions"));
 
-        faction.addEntry(entryBuilder.startBooleanToggle(Component.literal("RU Units Friendly"), CommonConfig.RU_UNITS_FRIENDLY.get())
+        faction.addEntry(entryBuilder.startBooleanToggle(
+                        Component.translatable("config.simpleenemymod.factions.ru_units_friendly"),
+                        CommonConfig.RU_UNITS_FRIENDLY.get())
                 .setDefaultValue(false)
-                .setTooltip(Component.literal("If true, Ru Units will be friendly with Players and PMC Units"))
+                .setTooltip(Component.translatable("config.simpleenemymod.factions.ru_units_friendly.tooltip"))
                 .setSaveConsumer(newValue -> CommonConfig.RU_UNITS_FRIENDLY.set(newValue))
                 .build());
 
-        faction.addEntry(entryBuilder.startBooleanToggle(Component.literal("US Units Friendly"), CommonConfig.US_UNITS_FRIENDLY.get())
+        faction.addEntry(entryBuilder.startBooleanToggle(
+                        Component.translatable("config.simpleenemymod.factions.us_units_friendly"),
+                        CommonConfig.US_UNITS_FRIENDLY.get())
                 .setDefaultValue(false)
-                .setTooltip(Component.literal("If true, Us Units will be friendly with Players and PMC Units"))
+                .setTooltip(Component.translatable("config.simpleenemymod.factions.us_units_friendly.tooltip"))
                 .setSaveConsumer(newValue -> CommonConfig.US_UNITS_FRIENDLY.set(newValue))
                 .build());
 

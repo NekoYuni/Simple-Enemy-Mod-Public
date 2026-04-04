@@ -10,15 +10,15 @@ public class SpawnClothConfig {
 
     public static void setup(ConfigBuilder builder, ConfigEntryBuilder entryBuilder) {
 
-        ConfigCategory spawns = builder.getOrCreateCategory(Component.literal("Spawns"));
+        ConfigCategory spawns = builder.getOrCreateCategory(Component.translatable("config.simpleenemymod.cat.spawns"));
 
         spawns.addEntry(entryBuilder.startBooleanToggle(
-                        Component.literal("Enable Village Garrison"),
+                        Component.translatable("config.simpleenemymod.spawns.enable_village_garrison"),
                         CommonConfig.ENABLE_VILLAGE_GARRISON_CONFIG.get())
                 .setDefaultValue(true)
                 .setTooltip(
-                        Component.literal("When set to true, soldiers will spawn in villages."),
-                        Component.literal("When set to false, the event is disabled")
+                        Component.translatable("config.simpleenemymod.spawns.enable_village_garrison.tooltip.1"),
+                        Component.translatable("config.simpleenemymod.spawns.enable_village_garrison.tooltip.2")
                 )
                 .setSaveConsumer(newValue -> CommonConfig.ENABLE_VILLAGE_GARRISON_CONFIG.set(newValue))
                 .build());
