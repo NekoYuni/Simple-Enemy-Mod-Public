@@ -19,7 +19,7 @@ public class EventProbabilityData extends SavedData {
 
     public boolean shouldTick() {
         tickCounter++;
-        if (tickCounter >= 1200) {
+        if (tickCounter >= 2400) {
             tickCounter = 0;
             return true;
         }

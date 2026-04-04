@@ -62,8 +62,11 @@ public class PatrolEvent extends DynamicEvent {
             return false;
         }
 
+        int min = CommonConfig.PATROL_MIN_SIZE.get();
+        int max = CommonConfig.PATROL_MAX_SIZE.get();
+
         boolean isRuFaction = level.random.nextBoolean();
-        int squadSize = 3 + level.random.nextInt(2);
+        int squadSize = min + level.random.nextInt(Math.max(1, max - min + 1));
 
         for (int i = 0; i < squadSize; i++) {
             spawnSoldier(level, pos, isRuFaction, false);

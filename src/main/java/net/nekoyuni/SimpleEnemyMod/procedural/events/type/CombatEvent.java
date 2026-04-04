@@ -60,7 +60,11 @@ public class CombatEvent extends DynamicEvent {
     public boolean execute(ServerLevel level, ServerPlayer player, BlockPos centerPos) {
         if (!SpawnHelper.isValidSpawn(level, centerPos)) return false;
 
-        int squadSize = 3 + level.random.nextInt(3);
+
+        int min = CommonConfig.COMBAT_MIN_SIZE.get();
+        int max = CommonConfig.COMBAT_MAX_SIZE.get();
+
+        int squadSize = min + level.random.nextInt(Math.max(1, max - min + 1));
         int separation = 24;
 
         BlockPos posRu = centerPos.offset(separation, 0, 0);
