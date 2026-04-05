@@ -108,7 +108,7 @@ public class RangedGunAttackGoal extends Goal {
 
     @Override
     public void start() {
-        this.attackDelay = 3 + this.mob.getRandom().nextInt(5);
+        this.attackDelay = 1 + this.mob.getRandom().nextInt(3); // Shoot Fix
 
         this.target = this.mob.getTarget();
 
@@ -123,6 +123,7 @@ public class RangedGunAttackGoal extends Goal {
 
         IGunOperator operator = IGunOperator.fromLivingEntity(this.mob);
         operator.aim(true);
+        operator.draw(() -> this.mob.getMainHandItem()); // Shoot Fix
 
         if (this.target != null) {
             this.mob.getLookControl().setLookAt(this.target, 30F, 30F);
@@ -393,7 +394,7 @@ public class RangedGunAttackGoal extends Goal {
                 this.SPREAD_INCREASE_PER_BLOCK, random);
 
 
-        operator.aim(true);
+        // operator.aim(true);
         ShootResult shootResult = operator.shoot(() -> finalPitch, () -> finalYaw);
 
 
