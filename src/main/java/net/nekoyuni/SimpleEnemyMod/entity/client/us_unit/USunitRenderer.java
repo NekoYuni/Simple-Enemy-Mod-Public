@@ -90,6 +90,13 @@ public class USunitRenderer extends MobRenderer<USunitEntity, USunitModel<USunit
             return;
         }
 
+        if (pEntity.isInCombat()) {
+            float combatYaw = pEntity.getCombatYaw();
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F - combatYaw));
+            return;
+        }
+
+
         super.setupRotations(pEntity, pPoseStack, pAgeInTicks, pBodyYRot, pPartialTicks);
     }
 

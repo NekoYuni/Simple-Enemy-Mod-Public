@@ -34,7 +34,7 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
     // ROLE
     protected UnitRole role = UnitRole.DEFAULT;
 
-    // ANIMATIONS
+    // ANIMATIONS AND RENDER
     protected static final int HURT_ANIMATION_DURATION = 20;
 
     public static final EntityDataAccessor<Integer> DAMAGE_ANIMATION_TICKS =
@@ -50,6 +50,14 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
     public final AnimationState hurtAnimationState = new AnimationState();
     public final AnimationState walkAnimationState = new AnimationState();
     public final AnimationState deathAnimationState = new AnimationState();
+
+    // RENDER - Shoot Fix
+    public static final EntityDataAccessor<Boolean> IS_IN_COMBAT =
+            SynchedEntityData.defineId(AbstractUnit.class, EntityDataSerializers.BOOLEAN);
+
+    public static final EntityDataAccessor<Float> COMBAT_YAW =
+            SynchedEntityData.defineId(AbstractUnit.class, EntityDataSerializers.FLOAT);
+
 
     // SKINS
     public int currentHurtVariant = -1;
@@ -99,6 +107,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         this.entityData.define(DATA_VARIANT_ID, 0);
         this.entityData.define(BACK_DEATH, false);
         this.entityData.define(DAMAGE_ANIMATION_TICKS, 0);
+        // Shoot fix
+        this.entityData.define(IS_IN_COMBAT, false);
+        this.entityData.define(COMBAT_YAW, 0.0f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -168,10 +179,24 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
 
         if (!this.level().isClientSide()) {
 
+            // SHOOT FIX
+            LivingEntity target = getTarget();
+            boolean inCombat = target != null && target.isAlive();
+            this.entityData.set(IS_IN_COMBAT, inCombat);
+
             int currentTicks = this.entityData.get(DAMAGE_ANIMATION_TICKS);
+
             if (currentTicks > 0) {
                 this.entityData.set(DAMAGE_ANIMATION_TICKS, currentTicks - 1);
             }
+
+            if (inCombat) {
+                double dx = target.getX() - getX();
+                double dz = target.getZ() - getZ();
+                float angle = (float)(Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0f;
+                this.entityData.set(COMBAT_YAW, angle);
+            }
+
 
             // DEBUG
             if (isDebug) {
@@ -330,6 +355,15 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         return 1.0F;
     }
 
+
+    // RENDER - SHOOT FIX
+    public boolean isInCombat() {
+        return this.entityData.get(IS_IN_COMBAT);
+    }
+
+    public float getCombatYaw() {
+        return this.entityData.get(COMBAT_YAW);
+    }
 
     // TACTICS GETTERS AND SETTERS
     public StrategyType getStrategy() {
