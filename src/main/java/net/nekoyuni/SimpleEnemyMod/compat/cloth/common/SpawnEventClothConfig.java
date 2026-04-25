@@ -36,7 +36,7 @@ public class SpawnEventClothConfig {
         spawnEvents.addEntry(entryBuilder.startDoubleField(
                         Component.translatable("config.simpleenemymod.spawn_event.combat_base_chance"),
                         CommonConfig.COMBAT_BASE_CHANCE.get())
-                .setDefaultValue(0.06)
+                .setDefaultValue(0.08)
                 .setMin(0.01)
                 .setMax(1.0)
                 .setTooltip(Component.translatable("config.simpleenemymod.spawn_event.combat_base_chance.tooltip"))

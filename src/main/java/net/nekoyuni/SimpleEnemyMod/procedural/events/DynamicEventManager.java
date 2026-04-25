@@ -22,6 +22,9 @@ public class DynamicEventManager {
 
     private static final EventCooldownManager COOLDOWN_MANAGER = new EventCooldownManager();
 
+    private static boolean isDebug = false;
+
+
     public static void registerEvent(DynamicEvent event) {
         REGISTERED_EVENTS.put(event.getId(), event);
     }
@@ -72,6 +75,11 @@ public class DynamicEventManager {
 
         double finalChance = currentChance * event.getBiomeModifier(level, targetPos);
 
+        if (isDebug) {
+            System.out.println("[SEM] Evaluating event " + event.getId() +
+                    " | chance=" + currentChance + " | roll=" + finalChance);
+        }
+
         if (RANDOM.nextDouble() < finalChance) {
             boolean success = event.execute(level, player, targetPos);
 
@@ -79,6 +87,12 @@ public class DynamicEventManager {
                 Map<String, Double> bases = new HashMap<>();
                 REGISTERED_EVENTS.forEach((id, e) -> bases.put(id, e.getBaseChance()));
                 data.resetAllChancesForPlayer(playerUUID, bases);
+
+                if (isDebug) {
+                    System.out.println("[SEM] Event TRIGGERED: " + event.getId() + " for player " + player.getName().getString());
+                }
+
+
                 return true;
             }
 

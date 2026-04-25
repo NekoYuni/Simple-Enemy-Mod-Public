@@ -16,10 +16,18 @@ public class EventProbabilityData extends SavedData {
     private final Map<String, Boolean> eventActiveStates = new HashMap<>();
     private final Map<String, Integer> playerTickCounters = new HashMap<>();
 
+    private boolean isDebug = false;
+
     public boolean shouldTickForPlayer(String playerUUID) {
         int count = playerTickCounters.getOrDefault(playerUUID, 0) + 1;
-        if (count >= 2400) {
+        if (count >= 2400) { // 2400
             playerTickCounters.put(playerUUID, 0);
+            setDirty();
+
+            if (isDebug) {
+                System.out.println("[SEM] Tick window reached for " + playerUUID);
+            }
+
             return true;
         }
         playerTickCounters.put(playerUUID, count);
@@ -60,6 +68,7 @@ public class EventProbabilityData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag eventList = new ListTag();
+
         playerChances.forEach((eventId, perPlayer) -> {
             CompoundTag eventEntry = new CompoundTag();
             eventEntry.putString("eventId", eventId);
@@ -85,6 +94,11 @@ public class EventProbabilityData extends SavedData {
         });
         tag.put("EventStates", stateList);
 
+
+        CompoundTag tickTag = new CompoundTag();
+        playerTickCounters.forEach(tickTag::putInt);
+        tag.put("TickCounters", tickTag);
+
         return tag;
     }
 
@@ -92,17 +106,22 @@ public class EventProbabilityData extends SavedData {
         EventProbabilityData data = new EventProbabilityData();
 
         if (tag.contains("PlayerChances")) {
+
             ListTag eventList = tag.getList("PlayerChances", Tag.TAG_COMPOUND);
             for (int i = 0; i < eventList.size(); i++) {
+
                 CompoundTag eventEntry = eventList.getCompound(i);
                 String eventId = eventEntry.getString("eventId");
                 if (eventId.isEmpty()) continue;
 
                 ListTag playerList = eventEntry.getList("players", Tag.TAG_COMPOUND);
                 Map<String, Double> perPlayer = new HashMap<>();
+
                 for (int j = 0; j < playerList.size(); j++) {
+
                     CompoundTag playerEntry = playerList.getCompound(j);
                     String uuid = playerEntry.getString("uuid");
+
                     if (!uuid.isEmpty()) {
                         perPlayer.put(uuid, playerEntry.getDouble("chance"));
                     }
@@ -114,11 +133,21 @@ public class EventProbabilityData extends SavedData {
         if (tag.contains("EventStates")) {
             ListTag list = tag.getList("EventStates", Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
+
                 CompoundTag entry = list.getCompound(i);
                 String id = entry.getString("id");
+
                 if (!id.isEmpty()) {
                     data.eventActiveStates.put(id, entry.getBoolean("active"));
                 }
+            }
+        }
+
+        if (tag.contains("TickCounters")) {
+            CompoundTag tickTag = tag.getCompound("TickCounters");
+
+            for (String key : tickTag.getAllKeys()) {
+                data.playerTickCounters.put(key, tickTag.getInt(key));
             }
         }
 
