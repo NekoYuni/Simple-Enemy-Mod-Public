@@ -93,9 +93,9 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
 
     ) {
 
-        poseStack.translate(-0.06D, 0.73D, 0.3D);
+        poseStack.translate(-0.06D, 0.73D, 0.36D); // -0.06, 0.73D, 0.3
         poseStack.mulPose(Axis.YP.rotationDegrees(-180));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-100)); // 90
         poseStack.scale(1.0F, -1.0F, -1.0F);
 
         itemRenderer.renderItem(
@@ -117,7 +117,7 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
         poseStack.translate(-0.03D, 0.85D, 0.1D);
 
         poseStack.mulPose(Axis.YP.rotationDegrees(-180));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-85));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-100)); // -85
 
         poseStack.mulPose(Axis.ZP.rotationDegrees(6));
         poseStack.scale(1.0F, -1.0F, -1.0F);

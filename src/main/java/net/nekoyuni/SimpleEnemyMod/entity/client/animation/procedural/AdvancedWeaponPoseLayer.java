@@ -112,6 +112,13 @@ public class AdvancedWeaponPoseLayer extends AbstractProceduralLayer {
         float yawFollow = 0.7f;
         float pitchFollow = 0.9f;
 
+        // Move Arms offset
+        leftArm.x = 4.0f;
+        leftArm.y = -3.0f;
+        leftArm.z = -2.0f;
+
+        rightArm.z = 1.0f;
+
         // Head follow
         rightArm.yRot += head.yRot * yawFollow;
         rightArm.xRot += head.xRot * pitchFollow;
