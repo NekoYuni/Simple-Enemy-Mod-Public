@@ -46,6 +46,11 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
     protected static final EntityDataAccessor<Integer> DATA_VARIANT_ID =
             SynchedEntityData.defineId(AbstractUnit.class, EntityDataSerializers.INT);
 
+    // COMBAT
+    public static final EntityDataAccessor<Boolean> IS_IN_COMBAT =
+            SynchedEntityData.defineId(AbstractUnit.class, EntityDataSerializers.BOOLEAN);
+
+
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState hurtAnimationState = new AnimationState();
     public final AnimationState walkAnimationState = new AnimationState();
@@ -99,6 +104,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         this.entityData.define(DATA_VARIANT_ID, 0);
         this.entityData.define(BACK_DEATH, false);
         this.entityData.define(DAMAGE_ANIMATION_TICKS, 0);
+
+        //Combat
+        this.entityData.define(IS_IN_COMBAT, false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -172,6 +180,11 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
             if (currentTicks > 0) {
                 this.entityData.set(DAMAGE_ANIMATION_TICKS, currentTicks - 1);
             }
+
+            // COMBAT
+            boolean inCombat = (this.getTarget() != null && this.getTarget().isAlive())
+                    || (this.tickCount - this.getLastHurtByMobTimestamp() < 100);
+            this.entityData.set(IS_IN_COMBAT, inCombat);
 
             // DEBUG
             if (isDebug) {
@@ -441,10 +454,15 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         return movementLockedByManager;
     }
 
+
+    // Weapon stance
+    public boolean isActiveCombat() {
+        return this.getEntityData().get(IS_IN_COMBAT);
+    }
+
     public void releaseMovementLock() {
         this.movementLockedByManager = false;
     }
-
 
     public abstract void equipRandomGun();
     public abstract void setupRoleGoals();

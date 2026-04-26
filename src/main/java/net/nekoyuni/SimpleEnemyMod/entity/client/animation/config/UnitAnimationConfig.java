@@ -7,6 +7,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.AnimationPriorit
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.LayeredAnimationManager;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.layer.IAnimationLayer;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.procedural.AdvancedWeaponPoseLayer;
+import net.nekoyuni.SimpleEnemyMod.entity.client.animation.procedural.CombatStateLayer;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.procedural.HeadTrackingLayer;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import org.slf4j.Logger;
@@ -88,6 +89,14 @@ public class UnitAnimationConfig {
                                 30.0f,
                                 -25.0f,
                                 45.0f
+                        )
+                )
+
+                // PROCEDURAL: Weapon Stance
+                .addProceduralLayer(
+                        new CombatStateLayer(
+                                rightArm,
+                                leftArm
                         )
                 )
 
