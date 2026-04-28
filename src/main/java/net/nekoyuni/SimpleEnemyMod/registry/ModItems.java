@@ -27,6 +27,9 @@ public class ModItems {
 
     private static final int COLOR_PMC_UNIT = 0x5B533F;
 
+    private static final int COLOR_BANDIT_UNIT = 0x3A3028; // Dark neutral color for bandit spawn eggs.
+    private static final int COLOR_BANDIT_ACCENT = 0x8A1F1F; // Red accent marks bandits as hostile.
+
 
     // US UNIT SPAWN EGGS
     public static final RegistryObject<Item> US_UNIT_SPAWN_EGG = ITEMS.register("us_unit_spawn_egg",
@@ -120,6 +123,17 @@ public class ModItems {
                     0x767860,
                     new Item.Properties().stacksTo(64),
                     UnitRole.FRIENDLY_SQUAD_UNIT
+            )
+    );
+
+    // BANDIT UNIT EGGS
+    public static final RegistryObject<Item> BANDIT_UNIT_SPAWN_EGG = ITEMS.register("bandit_unit_spawn_egg",
+            () -> new RoleSpawnEggItem(
+                    () -> ModEntities.BANDITUNIT.get(),
+                    COLOR_BANDIT_UNIT,
+                    COLOR_BANDIT_ACCENT,
+                    new Item.Properties().stacksTo(64),
+                    UnitRole.DEFAULT
             )
     );
 

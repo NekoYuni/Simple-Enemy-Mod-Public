@@ -36,6 +36,8 @@ public class ModCreativeTabs {
                         output.accept(ModItems.RU_SQUAD_LEADER_SPAWN_EGG.get());
                         output.accept(ModItems.RU_SQUAD_UNIT_SPAWN_EGG.get());
 
+                        output.accept(ModItems.BANDIT_UNIT_SPAWN_EGG.get()); // Expose the bandit test spawn egg in the mod tab.
+
                     })
                     .build()
     );

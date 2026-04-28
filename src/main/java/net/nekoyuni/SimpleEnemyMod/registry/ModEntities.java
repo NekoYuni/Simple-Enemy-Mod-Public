@@ -7,6 +7,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.BanditUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
@@ -37,6 +38,13 @@ public class ModEntities {
                             .sized(0.6F, 1.95F)
                             .clientTrackingRange(128)
                             .build("pmcunit"));
+
+    public static final RegistryObject<EntityType<BanditUnitEntity>> BANDITUNIT =
+            ENTITY_TYPES.register("banditunit",
+                    () -> EntityType.Builder.of(BanditUnitEntity::new, MobCategory.MONSTER)
+                            .sized(0.6F, 1.95F)
+                            .clientTrackingRange(128)
+                            .build("banditunit")); // Separate entity id lets bandits spawn and balance independently.
 
 
     public static void register(IEventBus eventBus) {

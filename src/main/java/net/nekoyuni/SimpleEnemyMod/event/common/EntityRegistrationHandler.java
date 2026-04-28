@@ -4,6 +4,7 @@ import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
 import net.minecraftforge.fml.common.Mod;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.BanditUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.registry.ModEntities;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
@@ -20,6 +21,7 @@ public class EntityRegistrationHandler {
         event.put(ModEntities.USUNIT.get(), USunitEntity.createAttributes().build());
         event.put(ModEntities.RUUNIT.get(), RUunitEntity.createAttributes().build());
         event.put(ModEntities.PMCUNIT.get(), PmcUnitEntity.createAttributes().build());
+        event.put(ModEntities.BANDITUNIT.get(), BanditUnitEntity.createAttributes().build()); // Bandits share the common unit attributes.
 
     }
 

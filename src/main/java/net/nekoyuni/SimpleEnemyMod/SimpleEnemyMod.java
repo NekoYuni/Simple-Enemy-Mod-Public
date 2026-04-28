@@ -9,6 +9,7 @@ import net.nekoyuni.SimpleEnemyMod.client.gui.screens.PmcUnitScreen;
 import net.nekoyuni.SimpleEnemyMod.compat.cloth.ClothConfigCompat;
 import net.nekoyuni.SimpleEnemyMod.compat.cloth.ClothConfigScreenHelper;
 import net.nekoyuni.SimpleEnemyMod.config.ModConfigs;
+import net.nekoyuni.SimpleEnemyMod.entity.client.bandit_unit.BanditUnitRenderer;
 import net.nekoyuni.SimpleEnemyMod.entity.client.pmc_unit.PmcUnitRenderer;
 import net.nekoyuni.SimpleEnemyMod.procedural.events.DynamicEventManager;
 import net.nekoyuni.SimpleEnemyMod.registry.*;
@@ -86,6 +87,8 @@ public class SimpleEnemyMod {
             event.accept(ModItems.PMC_UNIT_SPAWN_EGG);
             event.accept(ModItems.PMC_SQUAD_LEADER_SPAWN_EGG);
             event.accept(ModItems.PMC_SQUAD_UNIT_SPAWN_EGG);
+
+            event.accept(ModItems.BANDIT_UNIT_SPAWN_EGG); // Add bandits to the vanilla Spawn Eggs creative tab.
         }
 
 
@@ -105,6 +108,7 @@ public class SimpleEnemyMod {
             EntityRenderers.register(ModEntities.USUNIT.get(), USunitRenderer::new);
             EntityRenderers.register(ModEntities.RUUNIT.get(), RUunitRenderer::new);
             EntityRenderers.register(ModEntities.PMCUNIT.get(), PmcUnitRenderer::new);
+            EntityRenderers.register(ModEntities.BANDITUNIT.get(), BanditUnitRenderer::new); // Bandits reuse US model/textures via their renderer.
             MenuScreens.register(ModMenuTypes.PMC_UNIT_MENU.get(), PmcUnitScreen::new);
         }
     }

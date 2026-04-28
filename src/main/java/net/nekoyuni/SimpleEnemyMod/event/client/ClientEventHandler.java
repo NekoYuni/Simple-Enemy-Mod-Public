@@ -8,6 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
 import net.nekoyuni.SimpleEnemyMod.client.input.KeyBindings;
+import net.nekoyuni.SimpleEnemyMod.entity.client.bandit_unit.BanditUnitModelLayers;
 import net.nekoyuni.SimpleEnemyMod.entity.client.pmc_unit.PmcUnitModel;
 import net.nekoyuni.SimpleEnemyMod.entity.client.pmc_unit.PmcUnitModelLayers;
 import net.nekoyuni.SimpleEnemyMod.entity.client.ru_unit.RUunitModel;
@@ -25,6 +26,7 @@ public class ClientEventHandler {
         event.registerLayerDefinition(USunitModelLayers.USUNIT_LAYER, USunitModel::createBodyLayer);
         event.registerLayerDefinition(RUunitModelLayers.RUUNIT_LAYER, RUunitModel::createBodyLayer);
         event.registerLayerDefinition(PmcUnitModelLayers.PMCUNIT_LAYER, PmcUnitModel::createBodyLayer);
+        event.registerLayerDefinition(BanditUnitModelLayers.BANDITUNIT_LAYER, USunitModel::createBodyLayer);
     }
 
     @SubscribeEvent

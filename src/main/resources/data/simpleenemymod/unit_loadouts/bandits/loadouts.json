@@ -1,0 +1,14 @@
+{
+  "loadouts": {
+    "bandit_glock17": {
+      "gun_id": "tacz:glock_17",
+      "ammo_count": 17,
+      "fire_mode": "SEMI"
+    },
+    "bandit_m1911": {
+      "gun_id": "tacz:m1911",
+      "ammo_count": 7,
+      "fire_mode": "SEMI"
+    }
+  }
+}

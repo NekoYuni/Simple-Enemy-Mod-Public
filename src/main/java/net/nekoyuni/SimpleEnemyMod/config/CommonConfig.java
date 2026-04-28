@@ -59,6 +59,22 @@ public class CommonConfig {
     public static ForgeConfigSpec.DoubleValue CAVE_BASE_CHANCE;
     public static ForgeConfigSpec.DoubleValue CAVE_FAILURE_MULTIPLIER;
 
+    // Bandit retreat behavior
+    public static ForgeConfigSpec.BooleanValue BANDIT_RETREAT_ENABLED;
+    public static ForgeConfigSpec.DoubleValue BANDIT_RETREAT_HEALTH_THRESHOLD;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_DURATION_TICKS;
+    public static ForgeConfigSpec.DoubleValue BANDIT_RETREAT_SPEED;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_SEARCH_HORIZONTAL_RANGE;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_SEARCH_VERTICAL_RANGE;
+    public static ForgeConfigSpec.DoubleValue BANDIT_RETREAT_FALLBACK_DISTANCE;
+    public static ForgeConfigSpec.DoubleValue BANDIT_RETREAT_DESPAWN_DISTANCE;
+    public static ForgeConfigSpec.BooleanValue BANDIT_RETREAT_USE_COVER;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_COVER_SEARCH_RADIUS;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_COVER_MAX_ATTEMPTS;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_COVER_MAX_TRAVEL_TICKS;
+    public static ForgeConfigSpec.IntValue BANDIT_RETREAT_COVER_HOLD_TICKS;
+    public static ForgeConfigSpec.DoubleValue BANDIT_RETREAT_COVER_REACHED_DISTANCE;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 
@@ -188,6 +204,80 @@ public class CommonConfig {
         CAVE_FAILURE_MULTIPLIER = builder
                 .comment("Chance accumulation rate on failure for Cave Extraction Event")
                 .defineInRange("caveFailureMultiplier", 0.20, 0.01, 0.5);
+
+        builder.pop();
+
+        builder.push("bandit_retreat");
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_ENABLED = builder
+                .comment("Enables bandit retreat behavior after player damage.")
+                .define("enabled", true);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_HEALTH_THRESHOLD = builder
+                .comment("Bandits start retreating after player damage when health ratio is below this value.")
+                .defineInRange("healthThreshold", 0.70, 0.05, 1.0);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_DURATION_TICKS = builder
+                .comment("How long a full retreat attempt lasts before checking despawn safety.")
+                .defineInRange("durationTicks", 200, 20, 20 * 60);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_SPEED = builder
+                .comment("Movement speed multiplier used while bandits retreat.")
+                .defineInRange("speed", 1.25, 0.1, 3.0);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_SEARCH_HORIZONTAL_RANGE = builder
+                .comment("Horizontal search range for random full-retreat positions.")
+                .defineInRange("searchHorizontalRange", 16, 4, 64);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_SEARCH_VERTICAL_RANGE = builder
+                .comment("Vertical search range for random full-retreat positions.")
+                .defineInRange("searchVerticalRange", 6, 1, 32);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_FALLBACK_DISTANCE = builder
+                .comment("Fallback distance used when no random retreat position is found.")
+                .defineInRange("fallbackDistance", 12.0, 4.0, 64.0);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_DESPAWN_DISTANCE = builder
+                .comment("If every player is farther than this distance after retreat, the bandit disappears.")
+                .defineInRange("despawnDistance", 48.0, 8.0, 256.0);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_USE_COVER = builder
+                .comment("If true, bandits first try to move to cover before starting full retreat.")
+                .define("useCoverFirst", true);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_COVER_SEARCH_RADIUS = builder
+                .comment("Radius used to search for a cover position during the first retreat step.")
+                .defineInRange("coverSearchRadius", 14, 4, 48);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_COVER_MAX_ATTEMPTS = builder
+                .comment("Maximum random samples used while searching for cover.")
+                .defineInRange("coverMaxAttempts", 48, 4, 256);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_COVER_MAX_TRAVEL_TICKS = builder
+                .comment("Maximum time allowed for reaching cover before switching to full retreat.")
+                .defineInRange("coverMaxTravelTicks", 100, 10, 20 * 30);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_COVER_HOLD_TICKS = builder
+                .comment("Optional delay in cover before checking whether the bandit may despawn or must keep retreating.")
+                .defineInRange("coverHoldTicks", 20, 0, 20 * 10);
+        builder.comment("--------------------------------------------------");
+
+        BANDIT_RETREAT_COVER_REACHED_DISTANCE = builder
+                .comment("Distance from cover position that counts as cover reached.")
+                .defineInRange("coverReachedDistance", 2.0, 0.5, 8.0);
 
         builder.pop();
 
