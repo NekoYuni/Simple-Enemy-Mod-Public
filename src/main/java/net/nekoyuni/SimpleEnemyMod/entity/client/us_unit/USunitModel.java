@@ -17,6 +17,7 @@ public class USunitModel<T extends Entity> extends HierarchicalModel<T> {
     private final ModelPart head;
     private final ModelPart body;
     private final ModelPart rightArm;
+    private final ModelPart rightHandAnchor;
     private final ModelPart leftArm;
     private final ModelPart rightLeg;
     private final ModelPart leftLeg;
@@ -27,6 +28,7 @@ public class USunitModel<T extends Entity> extends HierarchicalModel<T> {
         this.head = this.unit.getChild("head");
         this.body = this.unit.getChild("body");
         this.rightArm = this.unit.getChild("rightArm");
+        this.rightHandAnchor = this.rightArm.getChild("rightHandAnchor");
         this.leftArm = this.unit.getChild("leftArm");
         this.rightLeg = this.unit.getChild("rightLeg");
         this.leftLeg = this.unit.getChild("leftLeg");
