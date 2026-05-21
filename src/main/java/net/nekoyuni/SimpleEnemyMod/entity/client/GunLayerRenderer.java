@@ -138,9 +138,9 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
     private void renderMinigun(T entity, ItemStack stack, PoseStack poseStack,
                                MultiBufferSource buffer, int packedLight) {
 
-        poseStack.translate(-0.03D, 0.85D, 0.1D);
+        poseStack.translate(0.01D, 0.30D, -0.25D);
         poseStack.mulPose(Axis.YP.rotationDegrees(-180));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-100)); // -85
+        poseStack.mulPose(Axis.XP.rotationDegrees(-70)); // -85
         poseStack.mulPose(Axis.ZP.rotationDegrees(6));
         poseStack.scale(1.0F, -1.0F, -1.0F);
 
