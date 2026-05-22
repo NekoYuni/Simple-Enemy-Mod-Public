@@ -98,13 +98,13 @@ public class AdvancedWeaponPoseLayer extends AbstractProceduralLayer {
         rightArm.xRot += 1.90f;
         leftArm.xRot  += 0.18f;
 
-        rightArm.zRot += 0.12f; // hacia dentro o hacia afuera del personaje (izq o der)
-        rightArm.yRot -= 0.15f; // Rotacion
+        rightArm.zRot += 0.12f;
+        rightArm.yRot -= 0.15f;
 
         leftArm.zRot  -= 0.25f;
         leftArm.yRot  += 0.45f;
 
-        leftArm.xRot  += 0.15f; // altura
+        leftArm.xRot  += 0.15f;
     }
 
     private void applyPistolPose(ModelPart root, Entity entity) {
