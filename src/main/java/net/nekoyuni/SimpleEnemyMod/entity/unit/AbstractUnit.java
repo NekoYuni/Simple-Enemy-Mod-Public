@@ -186,11 +186,11 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
 
             // COMBAT and SHOOT FIX
             LivingEntity target = getTarget();
-            boolean inCombat = (this.getTarget() != null && this.getTarget().isAlive())
+            boolean inCombat = (target != null && target.isAlive())
                     || (this.tickCount - this.getLastHurtByMobTimestamp() < 100);
             this.entityData.set(IS_IN_COMBAT, inCombat);
 
-            if (inCombat) {
+            if (target != null && target.isAlive()) {
                 double dx = target.getX() - getX();
                 double dz = target.getZ() - getZ();
                 float angle = (float)(Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0f;
