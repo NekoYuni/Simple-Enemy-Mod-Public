@@ -82,7 +82,7 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
         }
 
         // revisar bien, AbstractUnit
-        boolean inCombat = !(entity instanceof AbstractUnit unit2) || unit2.isActiveCombat();
+        boolean inCombat = !(entity instanceof AbstractUnit unit2) || unit2.isInCombat();
 
         if (inCombat) {
             renderStandardGun(entity, stack, poseStack, buffer, packedLight);

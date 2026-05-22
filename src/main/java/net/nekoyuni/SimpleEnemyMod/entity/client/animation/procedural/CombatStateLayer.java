@@ -36,7 +36,7 @@ public class CombatStateLayer extends AbstractProceduralLayer {
             return;
         }
 
-        if (unit.isActiveCombat()) {
+        if (unit.isInCombat()) {
             return;
         }
 

@@ -475,16 +475,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         return movementLockedByManager;
     }
 
-
-    // Weapon stance DELETE THIS LATER
-    public boolean isActiveCombat() {
-        return this.getEntityData().get(IS_IN_COMBAT);
-    }
-
     public void releaseMovementLock() {
         this.movementLockedByManager = false;
     }
-
 
     public abstract void equipRandomGun();
     public abstract void setupRoleGoals();
