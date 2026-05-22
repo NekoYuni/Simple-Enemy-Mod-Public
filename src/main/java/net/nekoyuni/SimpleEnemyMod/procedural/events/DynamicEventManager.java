@@ -22,6 +22,9 @@ public class DynamicEventManager {
 
     private static final EventCooldownManager COOLDOWN_MANAGER = new EventCooldownManager();
 
+    private static boolean isDebug = false;
+
+
     public static void registerEvent(DynamicEvent event) {
         REGISTERED_EVENTS.put(event.getId(), event);
     }
@@ -39,10 +42,10 @@ public class DynamicEventManager {
         COOLDOWN_MANAGER.tick(players);
 
         EventProbabilityData data = EventProbabilityData.get(level);
-        if (!data.shouldTick()) return;
 
         for (ServerPlayer player : players) {
             if (COOLDOWN_MANAGER.isOnCooldown(player)) continue;
+            if (!data.shouldTickForPlayer(player.getUUID().toString())) continue;
 
             for (DynamicEvent event : REGISTERED_EVENTS.values()) {
                 if (!data.isEventActive(event.getId())) continue;
@@ -61,34 +64,41 @@ public class DynamicEventManager {
 
         if (!event.canExecute(level, player)) return false;
 
-        double currentChance = data.getChance(event.getId(), event.getBaseChance());
+        String playerUUID = player.getUUID().toString();
+        double currentChance = data.getChance(event.getId(), playerUUID, event.getBaseChance());
 
         BlockPos targetPos = SpawnHelper.getRandomPositionNearPlayer(
                 player, event.getMinDistance(), event.getMaxDistance(), level
         );
 
-        if (ChunkSafetyEvaluator.isPlayerBase(level, targetPos)) {
-            return false;
-        }
+        if (ChunkSafetyEvaluator.isPlayerBase(level, targetPos)) return false;
 
-        double biomeMod = event.getBiomeModifier(level, targetPos);
-        double finalChance = currentChance * biomeMod;
+        double finalChance = currentChance * event.getBiomeModifier(level, targetPos);
+
+        if (isDebug) {
+            System.out.println("[SEM] Evaluating event " + event.getId() +
+                    " | chance=" + currentChance + " | roll=" + finalChance);
+        }
 
         if (RANDOM.nextDouble() < finalChance) {
             boolean success = event.execute(level, player, targetPos);
 
             if (success) {
-                for (Map.Entry<String, DynamicEvent> entry : REGISTERED_EVENTS.entrySet()) {
-                    data.resetChance(entry.getKey(), entry.getValue().getBaseChance());
+                Map<String, Double> bases = new HashMap<>();
+                REGISTERED_EVENTS.forEach((id, e) -> bases.put(id, e.getBaseChance()));
+                data.resetAllChancesForPlayer(playerUUID, bases);
+
+                if (isDebug) {
+                    System.out.println("[SEM] Event TRIGGERED: " + event.getId() + " for player " + player.getName().getString());
                 }
+
+
                 return true;
             }
 
         } else {
-            if (!COOLDOWN_MANAGER.isOnCooldown(player)) {
-                double increase = event.getBaseChance() * event.getFailureMultiplier();
-                data.setChance(event.getId(), Math.min(1.0, currentChance + increase));
-            }
+            double increase = event.getBaseChance() * event.getFailureMultiplier();
+            data.setChance(event.getId(), playerUUID, currentChance + increase);
         }
 
         return false;
@@ -104,7 +114,7 @@ public class DynamicEventManager {
 
         boolean success = event.execute(level, player, targetPos);
         if (success) {
-            EventProbabilityData.get(level).resetChance(eventId, event.getBaseChance());
+            EventProbabilityData.get(level).resetChance(eventId, player.getUUID().toString(), event.getBaseChance());
         }
         return success;
     }

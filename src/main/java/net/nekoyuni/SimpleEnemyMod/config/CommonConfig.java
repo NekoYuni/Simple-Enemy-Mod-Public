@@ -200,7 +200,7 @@ public class CommonConfig {
         // COMBAT CONFIG
         COMBAT_BASE_CHANCE = builder
                 .comment("Base spawn chance for Combat Event (per minute)")
-                .defineInRange("combatBaseChance", 0.06, 0.01, 1.0);
+                .defineInRange("combatBaseChance", 0.08, 0.01, 1.0);
         builder.comment("--------------------------------------------------");
 
         COMBAT_FAILURE_MULTIPLIER = builder
