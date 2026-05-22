@@ -33,7 +33,7 @@ public class UniversalArmorLayer<T extends AbstractUnit, M extends EntityModel<T
     private static final float GLOBAL_Y_OFFSET = -0.85F;
 
     // Scales
-    private static final float SCALE_HEAD = 1.25F;
+    private static final float SCALE_HEAD = 1.28F;
     private static final float SCALE_BODY = 1.98F;
     private static final float SCALE_ARMS = 1.90F;
     private static final float SCALE_LEGS = 2.10F;
@@ -43,25 +43,25 @@ public class UniversalArmorLayer<T extends AbstractUnit, M extends EntityModel<T
     // Arms and Chest
     private static final float OFF_ARM_RIGHT_X = -3.95F;
     private static final float OFF_ARM_RIGHT_Y = 0.0F;
-    private static final float OFF_ARM_RIGHT_Z = 0.0F;
+    private static final float OFF_ARM_RIGHT_Z = 3.0F;
 
-    private static final float OFF_ARM_LEFT_X = 3.95F;
+    private static final float OFF_ARM_LEFT_X = 3.00F;
     private static final float OFF_ARM_LEFT_Y = 0.0F;
-    private static final float OFF_ARM_LEFT_Z = 0.0F;
+    private static final float OFF_ARM_LEFT_Z = -4.50F;
 
     // Legs
     private static final float OFF_LEG_RIGHT_X = -2.0F;
-    private static final float OFF_LEG_RIGHT_Y = 8.0F;
-    private static final float OFF_LEG_RIGHT_Z = -0.10F;
+    private static final float OFF_LEG_RIGHT_Y = 9.0F;
+    private static final float OFF_LEG_RIGHT_Z = 3.50F;
 
     private static final float OFF_LEG_LEFT_X = 2.0F;
     private static final float OFF_LEG_LEFT_Y = 8.0F;
-    private static final float OFF_LEG_LEFT_Z = 0.10F;
+    private static final float OFF_LEG_LEFT_Z = -0.40F;
 
     // Foot
     private static final float OFF_BOOT_RIGHT_X = -2.0F;
     private static final float OFF_BOOT_RIGHT_Y = 11.0F;
-    private static final float OFF_BOOT_RIGHT_Z = 0.8F;
+    private static final float OFF_BOOT_RIGHT_Z = 3.8F;
 
     private static final float OFF_BOOT_LEFT_X = 2.0F;
     private static final float OFF_BOOT_LEFT_Y = 11.0F;

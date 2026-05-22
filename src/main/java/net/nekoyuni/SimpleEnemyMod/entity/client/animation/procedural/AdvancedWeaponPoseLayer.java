@@ -95,22 +95,29 @@ public class AdvancedWeaponPoseLayer extends AbstractProceduralLayer {
         rightArm.xRot += targetPitch;
         leftArm.xRot  += targetPitch;
 
-        rightArm.xRot += 1.48f;
+        rightArm.xRot += 1.90f;
         leftArm.xRot  += 0.18f;
 
         rightArm.zRot += 0.12f;
-        rightArm.yRot -= 0.05f;
+        rightArm.yRot -= 0.15f;
 
         leftArm.zRot  -= 0.25f;
-        leftArm.yRot  += 0.12f;
+        leftArm.yRot  += 0.45f;
 
-        leftArm.xRot  += 0.08f;
+        leftArm.xRot  += 0.15f;
     }
 
     private void applyPistolPose(ModelPart root, Entity entity) {
 
         float yawFollow = 0.7f;
         float pitchFollow = 0.9f;
+
+        // Move Arms offset
+        leftArm.x = 4.0f;
+        leftArm.y = -3.0f;
+        leftArm.z = -2.0f;
+
+        rightArm.z = 1.0f;
 
         // Head follow
         rightArm.yRot += head.yRot * yawFollow;

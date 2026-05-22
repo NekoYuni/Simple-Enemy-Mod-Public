@@ -34,7 +34,7 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
     // ROLE
     protected UnitRole role = UnitRole.DEFAULT;
 
-    // ANIMATIONS AND RENDER
+    // ANIMATIONS
     protected static final int HURT_ANIMATION_DURATION = 20;
 
     public static final EntityDataAccessor<Integer> DAMAGE_ANIMATION_TICKS =
@@ -179,16 +179,16 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
 
         if (!this.level().isClientSide()) {
 
-            // SHOOT FIX
-            LivingEntity target = getTarget();
-            boolean inCombat = target != null && target.isAlive();
-            this.entityData.set(IS_IN_COMBAT, inCombat);
-
             int currentTicks = this.entityData.get(DAMAGE_ANIMATION_TICKS);
-
             if (currentTicks > 0) {
                 this.entityData.set(DAMAGE_ANIMATION_TICKS, currentTicks - 1);
             }
+
+            // COMBAT and SHOOT FIX
+            LivingEntity target = getTarget();
+            boolean inCombat = (this.getTarget() != null && this.getTarget().isAlive())
+                    || (this.tickCount - this.getLastHurtByMobTimestamp() < 100);
+            this.entityData.set(IS_IN_COMBAT, inCombat);
 
             if (inCombat) {
                 double dx = target.getX() - getX();
@@ -473,6 +473,12 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         }
 
         return movementLockedByManager;
+    }
+
+
+    // Weapon stance DELETE THIS LATER
+    public boolean isActiveCombat() {
+        return this.getEntityData().get(IS_IN_COMBAT);
     }
 
     public void releaseMovementLock() {
