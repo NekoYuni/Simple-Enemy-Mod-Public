@@ -8,6 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.EffectConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
 import net.nekoyuni.SimpleEnemyMod.network.ModNetworking;
@@ -21,7 +22,7 @@ public class PlayerSuppressionEventHandler {
     @SubscribeEvent
     public static void onAmmoHitBlock(AmmoHitBlockEvent event) {
 
-        if (!CommonConfig.ENABLE_SUPPRESSION.get()) {
+        if (!EffectConfig.ENABLE_SUPPRESSION.get()) {
             return;
         }
 

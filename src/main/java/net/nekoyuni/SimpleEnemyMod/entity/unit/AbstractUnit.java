@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.UnitAttributesConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.IRoleHolder;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.IAnimatedEntity;
@@ -128,9 +129,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
                                         @Nullable CompoundTag dataTag) {
 
         if(!this.level().isClientSide) {
-            double health = CommonConfig.UNIT_HEALTH.get();
-            double speed = CommonConfig.UNIT_SPEED.get();
-            double range = CommonConfig.UNIT_DETECTION_RANGE.get();
+            double health = UnitAttributesConfig.UNIT_HEALTH.get();
+            double speed = UnitAttributesConfig.UNIT_SPEED.get();
+            double range = UnitAttributesConfig.UNIT_DETECTION_RANGE.get();
 
             this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(health);
             this.setHealth((float) health);

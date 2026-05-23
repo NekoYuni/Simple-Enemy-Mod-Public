@@ -2,6 +2,7 @@ package net.nekoyuni.SimpleEnemyMod.procedural.events.system;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.EventSpawnConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class EventCooldownManager {
 
     private int getCooldownTicks() {
         try {
-            return CommonConfig.EVENT_GLOBAL_COOLDOWN_TICKS.get();
+            return EventSpawnConfig.EVENT_GLOBAL_COOLDOWN_TICKS.get();
         } catch (Exception e) {
             return DEFAULT_COOLDOWN_TICKS;
         }

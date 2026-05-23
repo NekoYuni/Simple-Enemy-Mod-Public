@@ -5,7 +5,7 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.player.Player;
-import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.AiShootingConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.*;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 
@@ -23,13 +23,13 @@ public abstract class AbstractUnitGoals implements IRoleGoals {
         entity.goalSelector.addGoal(5, new TacticalManeuverGoal((AbstractUnit) entity));
         entity.goalSelector.addGoal(6, new RangedGunAttackGoal(
                 entity,
-                CommonConfig.MAX_SHOOT_DISTANCE.get().floatValue(),
-                CommonConfig.BASE_SPREAD.get().floatValue(),
-                CommonConfig.SPREAD_INCREASE.get().floatValue(),
-                CommonConfig.MIN_BURST.get(),
-                CommonConfig.MAX_BURST.get(),
-                CommonConfig.MIN_BURST_COOLDOWN.get(),
-                CommonConfig.MAX_BURST_COOLDOWN.get()
+                AiShootingConfig.MAX_SHOOT_DISTANCE.get().floatValue(),
+                AiShootingConfig.BASE_SPREAD.get().floatValue(),
+                AiShootingConfig.SPREAD_INCREASE.get().floatValue(),
+                AiShootingConfig.MIN_BURST.get(),
+                AiShootingConfig.MAX_BURST.get(),
+                AiShootingConfig.MIN_BURST_COOLDOWN.get(),
+                AiShootingConfig.MAX_BURST_COOLDOWN.get()
         ));
 
         entity.goalSelector.addGoal(8, new LookAtPlayerGoal(entity, Player.class, 8.0F));

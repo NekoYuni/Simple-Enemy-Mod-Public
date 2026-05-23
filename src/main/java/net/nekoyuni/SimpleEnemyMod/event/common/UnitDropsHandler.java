@@ -15,6 +15,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.DropsConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
 
@@ -35,7 +36,7 @@ public class UnitDropsHandler {
             return;
         }
 
-        if (!CommonConfig.ENABLE_CUSTOM_DROPS.get()) return;
+        if (!DropsConfig.ENABLE_CUSTOM_DROPS.get()) return;
 
         ItemStack sourceGun = findGunStack(unit);
         if (sourceGun.isEmpty()) return;
@@ -52,7 +53,7 @@ public class UnitDropsHandler {
 
         if (ammoId == null) return;
 
-        if (unit.getRandom().nextFloat() <= CommonConfig.GUN_DROP_CHANCE.get()) {
+        if (unit.getRandom().nextFloat() <= DropsConfig.GUN_DROP_CHANCE.get()) {
 
             int maxAmmo = TimelessAPI.getCommonGunIndex(gunId)
                     .map(index -> index.getGunData().getAmmoAmount())
@@ -84,7 +85,7 @@ public class UnitDropsHandler {
 
         }
 
-        if (unit.getRandom().nextFloat() <= CommonConfig.AMMO_DROP_CHANCE.get()) {
+        if (unit.getRandom().nextFloat() <= DropsConfig.AMMO_DROP_CHANCE.get()) {
 
             int ammoCount = 10 + unit.getRandom().nextInt(21);
             ItemStack ammoDrop = AmmoItemBuilder.create()

@@ -12,6 +12,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.GeneralConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
@@ -43,7 +44,7 @@ public class VillageGarrisonHandler {
     @SubscribeEvent
     public static void onVillagerSpawn(EntityJoinLevelEvent event) {
 
-        if (!CommonConfig.enableVillageGarrison) {
+        if (!GeneralConfig.enableVillageGarrison) {
             return;
         }
 

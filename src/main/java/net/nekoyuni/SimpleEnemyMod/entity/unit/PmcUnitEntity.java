@@ -26,6 +26,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.NetworkHooks;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.FactionsConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.AttackSpecificTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.CommanderOrderGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.NoPlayerHurtByTargetGoal;
@@ -212,12 +213,12 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
                 this).setAlertOthers().setUnseenMemoryTicks(600));
 
         // Friendlies
-        if (!CommonConfig.US_UNITS_FRIENDLY.get()) {
+        if (!FactionsConfig.US_UNITS_FRIENDLY.get()) {
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                     this, USunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
         }
 
-        if (!CommonConfig.RU_UNITS_FRIENDLY.get()) {
+        if (!FactionsConfig.RU_UNITS_FRIENDLY.get()) {
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                     this, RUunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
         }
@@ -239,11 +240,11 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
                 return false;
             }
 
-            if (CommonConfig.RU_UNITS_FRIENDLY.get() && target instanceof RUunitEntity) {
+            if (FactionsConfig.RU_UNITS_FRIENDLY.get() && target instanceof RUunitEntity) {
                 return false;
             }
 
-            if (CommonConfig.US_UNITS_FRIENDLY.get() && target instanceof USunitEntity) {
+            if (FactionsConfig.US_UNITS_FRIENDLY.get() && target instanceof USunitEntity) {
                 return false;
             }
 

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.FactionsConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.VerticalAwareTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.equipment.RuWeaponEquipper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
@@ -72,7 +73,7 @@ public class RUunitEntity extends AbstractUnit {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(
                 this).setAlertOthers().setUnseenMemoryTicks(600));
 
-        if (!CommonConfig.RU_UNITS_FRIENDLY.get()) {
+        if (!FactionsConfig.RU_UNITS_FRIENDLY.get()) {
 
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                     this, PmcUnitEntity.class, true, vRange).setUnseenMemoryTicks(800));
@@ -103,7 +104,7 @@ public class RUunitEntity extends AbstractUnit {
                 return false;
             }
 
-            if (CommonConfig.RU_UNITS_FRIENDLY.get() && target instanceof PmcUnitEntity) {
+            if (FactionsConfig.RU_UNITS_FRIENDLY.get() && target instanceof PmcUnitEntity) {
                 return false;
             }
 

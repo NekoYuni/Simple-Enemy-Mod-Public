@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.EventSpawnConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
@@ -25,12 +25,12 @@ public class CombatEvent extends DynamicEvent {
 
     @Override
     public double getBaseChance() {
-        return CommonConfig.COMBAT_BASE_CHANCE.get();
+        return EventSpawnConfig.COMBAT_BASE_CHANCE.get();
     }
 
     @Override
     public double getFailureMultiplier() {
-        return CommonConfig.COMBAT_FAILURE_MULTIPLIER.get();
+        return EventSpawnConfig.COMBAT_FAILURE_MULTIPLIER.get();
     }
 
     @Override
@@ -61,8 +61,8 @@ public class CombatEvent extends DynamicEvent {
         if (!SpawnHelper.isValidSpawn(level, centerPos)) return false;
 
 
-        int min = CommonConfig.COMBAT_MIN_SIZE.get();
-        int max = CommonConfig.COMBAT_MAX_SIZE.get();
+        int min = EventSpawnConfig.COMBAT_MIN_SIZE.get();
+        int max = EventSpawnConfig.COMBAT_MAX_SIZE.get();
 
         int squadSize = min + level.random.nextInt(Math.max(1, max - min + 1));
         int separation = 24;

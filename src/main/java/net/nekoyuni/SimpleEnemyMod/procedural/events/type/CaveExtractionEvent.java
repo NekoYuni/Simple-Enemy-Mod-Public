@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.MobSpawnType;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.EventSpawnConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
@@ -20,12 +21,12 @@ public class CaveExtractionEvent extends DynamicEvent {
 
     @Override
     public double getBaseChance() {
-        return CommonConfig.CAVE_BASE_CHANCE.get();
+        return EventSpawnConfig.CAVE_BASE_CHANCE.get();
     }
 
     @Override
     public double getFailureMultiplier() {
-        return CommonConfig.CAVE_FAILURE_MULTIPLIER.get();
+        return EventSpawnConfig.CAVE_FAILURE_MULTIPLIER.get();
     }
 
     @Override
@@ -51,8 +52,8 @@ public class CaveExtractionEvent extends DynamicEvent {
             return false;
         }
 
-        int min = CommonConfig.CAVE_MIN_SIZE.get();
-        int max = CommonConfig.CAVE_MAX_SIZE.get();
+        int min = EventSpawnConfig.CAVE_MIN_SIZE.get();
+        int max = EventSpawnConfig.CAVE_MAX_SIZE.get();
 
         boolean isRu = level.random.nextBoolean();
         int squadSize = min + level.random.nextInt(Math.max(1, max - min + 1));
