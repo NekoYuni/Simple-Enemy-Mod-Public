@@ -34,11 +34,11 @@ public class GeckoArmorAdjuster {
     private static final float OFF_ARM_LEFT_Z = -1.65F;
 
     // Legs and Boots
-    private static final float OFF_LEG_RIGHT_X = -1.30F; // pos izquierda, neg derecha
+    private static final float OFF_LEG_RIGHT_X = -0.25F; // pos izquierda, neg derecha
     private static final float OFF_LEG_RIGHT_Y = 5.50F; // altura
     private static final float OFF_LEG_RIGHT_Z = -0.45F; // hacia adelante o atras
 
-    private static final float OFF_LEG_LEFT_X = -0.10F;
+    private static final float OFF_LEG_LEFT_X = 0.10F;
     private static final float OFF_LEG_LEFT_Y = 5.98F;
     private static final float OFF_LEG_LEFT_Z = -0.5F;
 
