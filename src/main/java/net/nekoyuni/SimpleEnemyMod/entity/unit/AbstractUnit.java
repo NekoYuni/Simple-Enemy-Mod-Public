@@ -296,7 +296,12 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
     // MISC GETTERS AND SETTERS
     @Override
     public boolean isDeadOrDying() {
-        return super.isDeadOrDying() || this.deathAnimationState.isStarted();
+
+        if (this.level().isClientSide()) {
+            return super.isDeadOrDying() || this.deathAnimationState.isStarted();
+        }
+
+        return super.isDeadOrDying();
     }
 
     @Override
