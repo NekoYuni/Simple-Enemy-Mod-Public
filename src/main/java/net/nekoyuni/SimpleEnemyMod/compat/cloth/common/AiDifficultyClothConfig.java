@@ -6,6 +6,7 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.AiDifficultyConfig;
 
 
 public class AiDifficultyClothConfig {
@@ -21,10 +22,10 @@ public class AiDifficultyClothConfig {
 
         difficulty.addEntry(entryBuilder.startEnumSelector(
                         Component.translatable("config.simpleenemymod.difficulty"),
-                        CommonConfig.AIDifficulty.class,
-                        CommonConfig.DIFFICULTY.get())
-                .setDefaultValue(CommonConfig.AIDifficulty.NORMAL)
-                .setSaveConsumer(newValue -> CommonConfig.DIFFICULTY.set(newValue))
+                        AiDifficultyConfig.AIDifficulty.class,
+                        AiDifficultyConfig.DIFFICULTY.get())
+                .setDefaultValue(AiDifficultyConfig.AIDifficulty.NORMAL)
+                .setSaveConsumer(newValue -> AiDifficultyConfig.DIFFICULTY.set(newValue))
                 .build());
 
     }

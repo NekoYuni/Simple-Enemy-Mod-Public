@@ -5,6 +5,7 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.network.chat.Component;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.EffectConfig;
 
 public class EffectClothConfig {
 
@@ -14,10 +15,10 @@ public class EffectClothConfig {
 
         effect.addEntry(entryBuilder.startBooleanToggle(
                         Component.translatable("config.simpleenemymod.visual_effects.enable_suppression"),
-                        CommonConfig.ENABLE_SUPPRESSION.get())
+                        EffectConfig.ENABLE_SUPPRESSION.get())
                 .setDefaultValue(true)
                 .setTooltip(Component.translatable("config.simpleenemymod.visual_effects.enable_suppression.tooltip"))
-                .setSaveConsumer(newValue -> CommonConfig.ENABLE_SUPPRESSION.set(newValue))
+                .setSaveConsumer(newValue -> EffectConfig.ENABLE_SUPPRESSION.set(newValue))
                 .build());
     }
 

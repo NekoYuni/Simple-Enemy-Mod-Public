@@ -5,6 +5,7 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.network.chat.Component;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
+import net.nekoyuni.SimpleEnemyMod.config.common.FactionsConfig;
 
 public class FactionClothConfig {
 
@@ -14,18 +15,18 @@ public class FactionClothConfig {
 
         faction.addEntry(entryBuilder.startBooleanToggle(
                         Component.translatable("config.simpleenemymod.factions.ru_units_friendly"),
-                        CommonConfig.RU_UNITS_FRIENDLY.get())
+                        FactionsConfig.RU_UNITS_FRIENDLY.get())
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("config.simpleenemymod.factions.ru_units_friendly.tooltip"))
-                .setSaveConsumer(newValue -> CommonConfig.RU_UNITS_FRIENDLY.set(newValue))
+                .setSaveConsumer(newValue -> FactionsConfig.RU_UNITS_FRIENDLY.set(newValue))
                 .build());
 
         faction.addEntry(entryBuilder.startBooleanToggle(
                         Component.translatable("config.simpleenemymod.factions.us_units_friendly"),
-                        CommonConfig.US_UNITS_FRIENDLY.get())
+                        FactionsConfig.US_UNITS_FRIENDLY.get())
                 .setDefaultValue(false)
                 .setTooltip(Component.translatable("config.simpleenemymod.factions.us_units_friendly.tooltip"))
-                .setSaveConsumer(newValue -> CommonConfig.US_UNITS_FRIENDLY.set(newValue))
+                .setSaveConsumer(newValue -> FactionsConfig.US_UNITS_FRIENDLY.set(newValue))
                 .build());
 
     }

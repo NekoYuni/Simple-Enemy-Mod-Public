@@ -1,5 +1,7 @@
 package net.nekoyuni.SimpleEnemyMod.config;
 
+import net.nekoyuni.SimpleEnemyMod.config.common.AiDifficultyConfig;
+
 public class AIDifficultySettings {
 
     public final long patienceTimeout;
@@ -20,7 +22,7 @@ public class AIDifficultySettings {
     }
 
     public static AIDifficultySettings fromConfig() {
-        return switch (CommonConfig.DIFFICULTY.get()) {
+        return switch (AiDifficultyConfig.DIFFICULTY.get()) {
             case NORMAL -> new AIDifficultySettings(80, 1200, 40, 1.15, 1.3, 1.15);
             case ADVANCED -> new AIDifficultySettings(40, 1200, 15, 1.35, 1.45, 1.2);
         };
