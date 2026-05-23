@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.spawn.TacticalReactionManager;
 
@@ -43,10 +44,8 @@ public class BulletImpactEventHandler {
         for (PathfinderMob npc : nearbyNPCs) {
 
             if (!npc.isAlive() || npc == shooter) continue;
-
-            if (npc.getClass() == shooter.getClass()) {
-                continue;
-            }
+            if (npc.getClass() == shooter.getClass()) continue;
+            if (!(npc instanceof AbstractUnit)) continue;
 
             if (npc instanceof PmcUnitEntity && shooter instanceof Player) {
                 continue;
