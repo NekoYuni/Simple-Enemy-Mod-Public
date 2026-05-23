@@ -82,7 +82,7 @@ public class USunitModel<T extends Entity> extends HierarchicalModel<T> {
 
             this.animate(unitEntity.hurtAnimationState,
                     ModAnimationsDefinitions.UNIT_HURT_VARIANTS[safeVariantIndex],
-                    ageInTicks, 2.0f);  // ← Usar speed del manager
+                    ageInTicks, 2.0f);
 
             return;
         }

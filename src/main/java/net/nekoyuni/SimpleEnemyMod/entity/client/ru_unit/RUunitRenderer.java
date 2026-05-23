@@ -93,12 +93,6 @@ public class RUunitRenderer extends MobRenderer<RUunitEntity, RUunitModel<RUunit
             return;
         }
 
-        if (pEntity.isInCombat()) {
-            float combatYaw = pEntity.getCombatYaw();
-            pPoseStack.mulPose(Axis.YP.rotationDegrees(180.0F - combatYaw));
-            return;
-        }
-
         super.setupRotations(pEntity, pPoseStack, pAgeInTicks, pBodyYRot, pPartialTicks);
     }
 
@@ -108,6 +102,7 @@ public class RUunitRenderer extends MobRenderer<RUunitEntity, RUunitModel<RUunit
     }
 
     private static void reloadTextures(ResourceManager rm) {
+
         List<ResourceLocation> found = new ArrayList<>();
         rm.listResources("textures/entity/ru_unit", path -> path.getPath().endsWith(".png"))
                 .keySet().forEach(found::add);

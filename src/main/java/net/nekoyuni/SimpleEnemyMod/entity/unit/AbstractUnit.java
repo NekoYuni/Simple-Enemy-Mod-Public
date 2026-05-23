@@ -184,8 +184,8 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
                 this.entityData.set(DAMAGE_ANIMATION_TICKS, currentTicks - 1);
             }
 
-            // COMBAT and SHOOT FIX
             LivingEntity target = getTarget();
+
             boolean inCombat = (target != null && target.isAlive())
                     || (this.tickCount - this.getLastHurtByMobTimestamp() < 100);
             this.entityData.set(IS_IN_COMBAT, inCombat);
@@ -194,9 +194,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
                 double dx = target.getX() - getX();
                 double dz = target.getZ() - getZ();
                 float angle = (float)(Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0f;
+
                 this.entityData.set(COMBAT_YAW, angle);
             }
-
 
             // DEBUG
             if (isDebug) {
@@ -208,7 +208,14 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
                 this.setCustomNameVisible(true);
                 this.setGlowingTag(false);
             }
+        }
 
+        // Client Patch
+        if (this.entityData.get(IS_IN_COMBAT)) {
+            float combatYaw = this.entityData.get(COMBAT_YAW);
+
+            this.yBodyRot = combatYaw;
+            this.yHeadRot = combatYaw;
         }
     }
 
