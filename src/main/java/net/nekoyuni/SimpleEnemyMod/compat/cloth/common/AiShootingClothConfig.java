@@ -18,7 +18,7 @@ public class AiShootingClothConfig {
                         AiShootingConfig.MAX_SHOOT_DISTANCE.get())
                 .setDefaultValue(90.0)
                 .setMin(10.0)
-                .setMax(200.0)
+                .setMax(368.0)
                 .setTooltip(Component.translatable("config.simpleenemymod.ai_shooting.max_shoot_distance.tooltip"))
                 .setSaveConsumer(newValue -> AiShootingConfig.MAX_SHOOT_DISTANCE.set(newValue))
                 .build());
@@ -41,6 +41,16 @@ public class AiShootingClothConfig {
                 .setMax(1.0)
                 .setTooltip(Component.translatable("config.simpleenemymod.ai_shooting.spread_increase.tooltip"))
                 .setSaveConsumer(newValue -> AiShootingConfig.SPREAD_INCREASE.set(newValue))
+                .build());
+
+        shooting.addEntry(entryBuilder.startDoubleField(
+                        Component.translatable("config.simpleenemymod.ai_shooting.max_spread"),
+                        AiShootingConfig.MAX_SPREAD.get())
+                .setDefaultValue(1.2)
+                .setMin(0.0)
+                .setMax(10.0)
+                .setTooltip(Component.translatable("config.simpleenemymod.ai_shooting.max_spread.tooltip"))
+                .setSaveConsumer(newValue -> AiShootingConfig.MAX_SPREAD.set(newValue))
                 .build());
 
         shooting.addEntry(entryBuilder.startIntSlider(

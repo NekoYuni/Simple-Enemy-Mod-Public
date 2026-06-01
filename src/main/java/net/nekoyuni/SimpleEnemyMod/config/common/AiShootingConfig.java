@@ -7,6 +7,7 @@ public class AiShootingConfig {
     public static ForgeConfigSpec.DoubleValue MAX_SHOOT_DISTANCE;
     public static ForgeConfigSpec.DoubleValue BASE_SPREAD;
     public static ForgeConfigSpec.DoubleValue SPREAD_INCREASE;
+    public static ForgeConfigSpec.DoubleValue MAX_SPREAD;
     public static ForgeConfigSpec.IntValue MIN_BURST;
     public static ForgeConfigSpec.IntValue MAX_BURST;
     public static ForgeConfigSpec.IntValue MIN_BURST_COOLDOWN;
@@ -17,7 +18,7 @@ public class AiShootingConfig {
 
         MAX_SHOOT_DISTANCE = builder
                 .comment("Maximum shooting distance")
-                .defineInRange("maxShootDistance", 90.0, 10.0, 200.0);
+                .defineInRange("maxShootDistance", 90.0, 10.0, 384.0);
 
         BASE_SPREAD = builder
                 .comment("Base bullet spread (lower = more accurate)")
@@ -26,6 +27,11 @@ public class AiShootingConfig {
         SPREAD_INCREASE = builder
                 .comment("Spread increase per block of distance to target (accuracy penalty at range)")
                 .defineInRange("spreadIncrease", 0.012, 0.0, 1.0);
+
+        MAX_SPREAD = builder
+                .comment("Maximum bullet spread limit",
+                        "Prevents accuracy penalties from increasing indefinitely at long range")
+                .defineInRange("maxSpread", 1.2, 0.0, 10.0);
 
         MIN_BURST = builder
                 .comment("Minimum shots per burst")

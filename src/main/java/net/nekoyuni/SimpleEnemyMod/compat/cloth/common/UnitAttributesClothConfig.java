@@ -37,7 +37,7 @@ public class UnitAttributesClothConfig {
                         UnitAttributesConfig.UNIT_DETECTION_RANGE.get())
                 .setDefaultValue(96.0)
                 .setMin(32.0)
-                .setMax(192.0)
+                .setMax(384.0)
                 .setTooltip(Component.translatable("config.simpleenemymod.unit_attributes.detection_range.tooltip"))
                 .setSaveConsumer(newValue -> UnitAttributesConfig.UNIT_DETECTION_RANGE.set(newValue))
                 .build());

@@ -17,7 +17,7 @@ public class ClientConfig {
                         "Max Render Distance (in Blocks) for Units",
                         "Important!!: Render Distance => Detection Range"
                 )
-                .defineInRange("renderDistance", 128,32,192);
+                .defineInRange("renderDistance", 128,32,384);
 
         builder.pop();
 

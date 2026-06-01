@@ -12,7 +12,7 @@ public class RenderClothConfig {
         ConfigCategory render = builder.getOrCreateCategory(Component.translatable("config.simpleenemymod.cat.render_distance"));
 
         render.addEntry(entryBuilder.startIntSlider(
-                        Component.translatable("config.simpleenemymod.render_distance"), ClientConfig.RENDER_DISTANCE.get(), 32, 192)
+                        Component.translatable("config.simpleenemymod.render_distance"), ClientConfig.RENDER_DISTANCE.get(), 32, 384)
                 .setDefaultValue(128)
                 .setTooltip(
                         Component.translatable("config.simpleenemymod.render_distance.tooltip.1"),

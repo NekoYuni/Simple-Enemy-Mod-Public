@@ -24,17 +24,14 @@
   "key.category.simpleenemymod.general": "Simple Enemy Mod",
   "key.simpleenemymod.commander_menu": "Open Commander Menu",
 
-
   "config.simpleenemymod.cat.render_distance": "Render",
   "config.simpleenemymod.render_distance": "Render Distance",
   "config.simpleenemymod.render_distance.tooltip.1": "Max Render Distance (in Blocks) for Units",
   "config.simpleenemymod.render_distance.tooltip.2": "Important!!: Render Distance > Detection Range",
 
-
   "config.simpleenemymod.cat.difficulty": "Difficulty",
   "config.simpleenemymod.difficulty": "AI Difficulty",
   "config.simpleenemymod.difficulty.description": "AI Difficulty preset.\nDoes NOT affect soldiers accuracy. Only affects tactical maneuver timers and movement speeds.\n\nNORMAL: More static soldiers, slower combat pacing.\nADVANCED: More dynamic and aggressive soldiers.",
-
 
   "config.simpleenemymod.cat.ai_shooting": "AI Shooting",
   "config.simpleenemymod.ai_shooting.max_shoot_distance": "Max Shoot Distance",
@@ -45,6 +42,9 @@
 
   "config.simpleenemymod.ai_shooting.spread_increase": "Spread Increase",
   "config.simpleenemymod.ai_shooting.spread_increase.tooltip": "Spread increase per block of distance to target (accuracy penalty at range)",
+
+  "config.simpleenemymod.ai_shooting.max_spread": "Max Spread Limit",
+  "config.simpleenemymod.ai_shooting.max_spread.tooltip": "Prevents accuracy penalties from increasing indefinitely at long range",
 
   "config.simpleenemymod.ai_shooting.min_burst": "Min Burst",
   "config.simpleenemymod.ai_shooting.min_burst.tooltip": "Minimum shots per burst",
@@ -58,7 +58,6 @@
   "config.simpleenemymod.ai_shooting.max_burst_cooldown": "Max Burst Cooldown",
   "config.simpleenemymod.ai_shooting.max_burst_cooldown.tooltip": "Maximum cooldown between bursts (ticks)",
 
-
   "config.simpleenemymod.cat.drops": "Drops",
   "config.simpleenemymod.drops.enable_custom_drops": "Enable Custom Drops",
   "config.simpleenemymod.drops.enable_custom_drops.tooltip": "Enables or disables modified weapon drops for Units.",
@@ -69,11 +68,9 @@
   "config.simpleenemymod.drops.ammo_drop_chance": "Ammo Drop Chance",
   "config.simpleenemymod.drops.ammo_drop_chance.tooltip": "Probability that a Unit will drop extra ammo upon death (0.0 to 1.0)",
 
-
   "config.simpleenemymod.cat.visual_effects": "Visual Effects",
   "config.simpleenemymod.visual_effects.enable_suppression": "Enable Player Suppression",
   "config.simpleenemymod.visual_effects.enable_suppression.tooltip": "Activate or deactivate the visual suppression effect",
-
 
   "config.simpleenemymod.cat.factions": "Factions",
   "config.simpleenemymod.factions.ru_units_friendly": "RU Units Friendly",
@@ -82,12 +79,10 @@
   "config.simpleenemymod.factions.us_units_friendly": "US Units Friendly",
   "config.simpleenemymod.factions.us_units_friendly.tooltip": "If true, US Units will be friendly with Players and PMC Units",
 
-
   "config.simpleenemymod.cat.spawns": "Spawns",
   "config.simpleenemymod.spawns.enable_village_garrison": "Enable Village Garrison",
   "config.simpleenemymod.spawns.enable_village_garrison.tooltip.1": "When set to true, soldiers will spawn in villages.",
   "config.simpleenemymod.spawns.enable_village_garrison.tooltip.2": "When set to false, the event is disabled",
-
 
   "config.simpleenemymod.cat.spawn_event": "Spawn Events",
   "config.simpleenemymod.spawn_event.patrol_base_chance": "Patrol Base Chance",
@@ -107,7 +102,6 @@
 
   "config.simpleenemymod.spawn_event.cave_failure_multiplier": "Cave Failure Multiplier",
   "config.simpleenemymod.spawn_event.cave_failure_multiplier.tooltip": "Chance accumulation rate on failure for Cave Extraction Event",
-
 
   "config.simpleenemymod.cat.unit_attributes": "Unit Attributes",
   "config.simpleenemymod.unit_attributes.max_health": "Unit Max Health",

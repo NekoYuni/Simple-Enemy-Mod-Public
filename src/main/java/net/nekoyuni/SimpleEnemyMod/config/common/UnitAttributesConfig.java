@@ -23,7 +23,7 @@ public class UnitAttributesConfig {
 
         UNIT_DETECTION_RANGE = builder
                 .comment("Detection Range for All Units")
-                .defineInRange("detectionRange", 96.00, 32.00, 192.00);
+                .defineInRange("detectionRange", 96.00, 32.00, 384.0);
 
         builder.pop();
 
