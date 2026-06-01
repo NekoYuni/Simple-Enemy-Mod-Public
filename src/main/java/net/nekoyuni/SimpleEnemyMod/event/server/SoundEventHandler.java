@@ -44,6 +44,7 @@ public class SoundEventHandler {
         Vec3 impactPos = event.getHitResult().getLocation();
         Entity shooter = event.getAmmo().getOwner();
 
+        // TODO Refactor to this. If is PMC Unit; return
         if (!(shooter instanceof USunitEntity || shooter instanceof RUunitEntity)) {
             return;
         }
