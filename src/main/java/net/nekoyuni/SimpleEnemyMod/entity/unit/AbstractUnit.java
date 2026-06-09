@@ -26,6 +26,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.IAnimatedEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.LayeredAnimationManager;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.StrategyType;
 
 import javax.annotation.Nullable;
@@ -225,7 +226,7 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         Entity attacker = source.getDirectEntity();
         if (attacker == null) attacker = source.getEntity();
 
-        if (attacker != null && attacker.getClass() == this.getClass()) return false;
+        if (UnitFactionTags.isFriendlyFire(this, attacker)) return false;
 
         boolean damageOccurred = super.hurt(source, amount);
 

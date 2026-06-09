@@ -9,8 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
 import net.nekoyuni.SimpleEnemyMod.config.common.EffectConfig;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.network.ModNetworking;
 import net.nekoyuni.SimpleEnemyMod.network.packets.PacketSuppression;
 
@@ -31,8 +30,7 @@ public class PlayerSuppressionEventHandler {
         Entity shooter = event.getAmmo().getOwner();
         if (shooter == null) return;
 
-        boolean isEnemy = (shooter instanceof RUunitEntity) ||
-                (shooter instanceof USunitEntity);
+        boolean isEnemy = UnitFactionTags.isRuUnit(shooter) || UnitFactionTags.isUsUnit(shooter);
 
         if (!isEnemy) {
             return;

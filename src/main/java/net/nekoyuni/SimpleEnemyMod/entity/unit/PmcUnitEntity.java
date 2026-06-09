@@ -14,7 +14,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +33,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.VerticalAwareTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.ICommandableMob;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.OrderType;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.entity.equipment.PmcUnitWeaponEquipper;
 import net.nekoyuni.SimpleEnemyMod.inventory.PmcUnitMenu;
 import net.nekoyuni.SimpleEnemyMod.inventory.UnitInventoryHandler;
@@ -215,12 +215,14 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
         // Friendlies
         if (!FactionsConfig.US_UNITS_FRIENDLY.get()) {
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                    this, USunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
+                    this, LivingEntity.class, true, vRange,
+                    (target) -> fireFilter.test(target) && UnitFactionTags.isUsUnit(target)).setUnseenMemoryTicks(800));
         }
 
         if (!FactionsConfig.RU_UNITS_FRIENDLY.get()) {
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                    this, RUunitEntity.class, true, vRange, fireFilter).setUnseenMemoryTicks(800));
+                    this, LivingEntity.class, true, vRange,
+                    (target) -> fireFilter.test(target) && UnitFactionTags.isRuUnit(target)).setUnseenMemoryTicks(800));
         }
 
         // Normal Goals
@@ -236,20 +238,20 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
         this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                 this, Monster.class, true, vRange, (target) -> {
 
-            if (target.getClass() == this.getClass()) {
+            if (!fireFilter.test(target)) {
                 return false;
             }
 
-            if (FactionsConfig.RU_UNITS_FRIENDLY.get() && target instanceof RUunitEntity) {
+            if (UnitFactionTags.isFriendlyToPmc(target)) {
                 return false;
             }
 
-            if (FactionsConfig.US_UNITS_FRIENDLY.get() && target instanceof USunitEntity) {
-                return false;
+            if (UnitFactionTags.isTaggedUnit(target)) {
+                return true;
             }
 
             if (target instanceof AbstractUnit) {
-                return true;
+                return !UnitFactionTags.isSameTaggedFaction(this, target);
             }
 
             return target instanceof Enemy;

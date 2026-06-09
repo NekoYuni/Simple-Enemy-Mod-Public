@@ -11,8 +11,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.network.ModNetworking;
 import net.nekoyuni.SimpleEnemyMod.network.packets.PacketPlayImpactSound;
 
@@ -44,8 +43,7 @@ public class SoundEventHandler {
         Vec3 impactPos = event.getHitResult().getLocation();
         Entity shooter = event.getAmmo().getOwner();
 
-        // TODO Refactor to this. If is PMC Unit; return
-        if (!(shooter instanceof USunitEntity || shooter instanceof RUunitEntity)) {
+        if (!(UnitFactionTags.isUsUnit(shooter) || UnitFactionTags.isRuUnit(shooter))) {
             return;
         }
 

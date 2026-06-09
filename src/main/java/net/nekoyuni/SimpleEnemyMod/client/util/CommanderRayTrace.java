@@ -7,7 +7,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class CommanderRayTrace {
 
         for (Entity entity : player.level().getEntities(player, searchBox)) {
 
-            if (entity == player || entity instanceof PmcUnitEntity) continue;
+            if (entity == player || UnitFactionTags.isPmcUnit(entity)) continue;
 
             AABB bb = entity.getBoundingBox().inflate(entity.getPickRadius());
             Optional<Vec3> hit = bb.clip(eyePos, reachVec);

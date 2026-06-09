@@ -4,7 +4,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +13,7 @@ import net.nekoyuni.SimpleEnemyMod.config.common.FactionsConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.VerticalAwareTargetGoal;
 import net.nekoyuni.SimpleEnemyMod.entity.equipment.RuWeaponEquipper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.registry.ModSounds;
 
 public class RUunitEntity extends AbstractUnit {
@@ -76,14 +76,16 @@ public class RUunitEntity extends AbstractUnit {
         if (!FactionsConfig.RU_UNITS_FRIENDLY.get()) {
 
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                    this, PmcUnitEntity.class, true, vRange).setUnseenMemoryTicks(800));
+                    this, LivingEntity.class, true, vRange,
+                    UnitFactionTags::isPmcUnit).setUnseenMemoryTicks(800));
 
             this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                     this, Player.class, true, vRange).setUnseenMemoryTicks(800));
         }
 
         this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                this, USunitEntity.class, true, vRange).setUnseenMemoryTicks(800));
+                this, LivingEntity.class, true, vRange,
+                UnitFactionTags::isUsUnit).setUnseenMemoryTicks(800));
 
         this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
                 this, Zombie.class, true, vRange));
@@ -100,16 +102,16 @@ public class RUunitEntity extends AbstractUnit {
         this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
                 this, Monster.class, true, vRange, (target) -> {
 
-            if (target.getClass() == this.getClass()) {
+            if (UnitFactionTags.isFriendlyToRu(target)) {
                 return false;
             }
 
-            if (FactionsConfig.RU_UNITS_FRIENDLY.get() && target instanceof PmcUnitEntity) {
-                return false;
+            if (UnitFactionTags.isTaggedUnit(target)) {
+                return true;
             }
 
             if (target instanceof AbstractUnit) {
-                return true;
+                return !UnitFactionTags.isSameTaggedFaction(this, target);
             }
 
             return target instanceof Enemy;
