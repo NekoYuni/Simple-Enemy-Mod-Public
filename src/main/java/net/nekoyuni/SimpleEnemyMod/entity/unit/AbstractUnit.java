@@ -212,7 +212,7 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         }
 
         // Client Patch
-        if (this.entityData.get(IS_IN_COMBAT)) {
+        if (this.entityData.get(IS_IN_COMBAT) && !this.isDeadOrDying()) {
             float combatYaw = this.entityData.get(COMBAT_YAW);
 
             this.yBodyRot = combatYaw;
@@ -240,38 +240,29 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
 
     @Override
     public void die(DamageSource pDamageSource) {
-
         if (!this.hasComputedDeathDirection) {
             this.hasComputedDeathDirection = true;
 
             Entity attacker = pDamageSource.getEntity();
-            if (attacker != null) {
+            if (attacker != null && !this.level().isClientSide()) {
                 double dX = attacker.getX() - this.getX();
                 double dZ = attacker.getZ() - this.getZ();
+                float damageYaw = (float)(Mth.atan2(dZ, dX) * (180.0 / Math.PI)) - 90.0f;
 
-                float damageYaw = (float) (Mth.atan2(dZ, dX) * (180F / Math.PI)) - 90.0F;
-                float entityYaw = this.getYRot();
-                float angleDifference = Mth.wrapDegrees(damageYaw - entityYaw);
+                float referenceYaw = this.isInCombat()
+                        ? this.entityData.get(COMBAT_YAW)
+                        : this.getYRot();
 
+                float angleDifference = Mth.wrapDegrees(damageYaw - referenceYaw);
                 boolean shouldPlayBackDeath = Math.abs(angleDifference) > 90.0F;
 
-                if (!this.level().isClientSide()) {
-                    this.entityData.set(BACK_DEATH, shouldPlayBackDeath);
-                }
-            } else {
-                if (!this.level().isClientSide()) {
-                    this.entityData.set(BACK_DEATH, false);
-                }
+                this.entityData.set(BACK_DEATH, shouldPlayBackDeath);
+            } else if (!this.level().isClientSide()) {
+                this.entityData.set(BACK_DEATH, false);
             }
         }
 
         super.die(pDamageSource);
-
-        /*
-        if (this.level().isClientSide()) {
-            this.deathAnimationState.start(this.tickCount);
-        }
-         */
     }
 
     @Override
