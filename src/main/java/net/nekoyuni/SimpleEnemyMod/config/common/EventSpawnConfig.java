@@ -13,7 +13,8 @@ public class EventSpawnConfig {
     public static ForgeConfigSpec.DoubleValue CAVE_BASE_CHANCE;
     public static ForgeConfigSpec.DoubleValue CAVE_FAILURE_MULTIPLIER;
 
-    public static ForgeConfigSpec.IntValue EVENT_GLOBAL_COOLDOWN_TICKS; // TODO
+    public static ForgeConfigSpec.IntValue EVENT_GLOBAL_COOLDOWN_TICKS;
+    public static ForgeConfigSpec.IntValue EVENT_TICK_WINDOW;
 
     public static ForgeConfigSpec.IntValue PATROL_MIN_SIZE;
     public static ForgeConfigSpec.IntValue PATROL_MAX_SIZE;
@@ -30,9 +31,12 @@ public class EventSpawnConfig {
         builder.comment("--------------------------------------------------");
 
         EVENT_GLOBAL_COOLDOWN_TICKS = builder
-                .comment("Global cooldown ticks between events. 20 ticks = 1 second. Default: 600 = 30 seconds")
-                .defineInRange("eventGlobalCooldownTicks", 800, 100, 72000);
+                .comment("Global cooldown ticks between events. 20 ticks = 1 second. 4800 = 4 minutes")
+                .defineInRange("eventGlobalCooldownTicks", 4800, 100, 72000);
 
+        EVENT_TICK_WINDOW = builder
+                .comment("Ticks between event evaluation attempts per player. 20 ticks = 1 second. Default: 3600 = 1 minute")
+                .defineInRange("eventTickWindow", 1200, 100, 72000);
 
         // PATROL EVENT
         PATROL_BASE_CHANCE = builder

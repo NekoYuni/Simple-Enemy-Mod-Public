@@ -6,6 +6,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.nekoyuni.SimpleEnemyMod.config.common.EventSpawnConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,18 +17,18 @@ public class EventProbabilityData extends SavedData {
     private final Map<String, Boolean> eventActiveStates = new HashMap<>();
     private final Map<String, Integer> playerTickCounters = new HashMap<>();
 
-    private boolean isDebug = false;
-
     public boolean shouldTickForPlayer(String playerUUID) {
+        int window;
+        try {
+            window = EventSpawnConfig.EVENT_TICK_WINDOW.get();
+        } catch (Exception e) {
+            window = 600;
+        }
+
         int count = playerTickCounters.getOrDefault(playerUUID, 0) + 1;
-        if (count >= 2400) { // 2400
+        if (count >= window) {
             playerTickCounters.put(playerUUID, 0);
             setDirty();
-
-            if (isDebug) {
-                System.out.println("[SEM] Tick window reached for " + playerUUID);
-            }
-
             return true;
         }
         playerTickCounters.put(playerUUID, count);
@@ -62,6 +63,11 @@ public class EventProbabilityData extends SavedData {
 
     public void setEventActive(String eventId, boolean active) {
         eventActiveStates.put(eventId, active);
+        setDirty();
+    }
+
+    public void resetTickCounterForPlayer(String playerUUID) {
+        playerTickCounters.put(playerUUID, 0);
         setDirty();
     }
 

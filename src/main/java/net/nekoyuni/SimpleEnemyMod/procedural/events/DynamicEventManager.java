@@ -1,5 +1,6 @@
 package net.nekoyuni.SimpleEnemyMod.procedural.events;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +13,7 @@ import net.nekoyuni.SimpleEnemyMod.procedural.events.type.CombatEvent;
 import net.nekoyuni.SimpleEnemyMod.procedural.events.type.PatrolEvent;
 import net.nekoyuni.SimpleEnemyMod.spawn.utils.SpawnHelper;
 import net.nekoyuni.SimpleEnemyMod.world.data.EventProbabilityData;
+import org.slf4j.Logger;
 
 import java.util.*;
 
@@ -22,8 +24,8 @@ public class DynamicEventManager {
 
     private static final EventCooldownManager COOLDOWN_MANAGER = new EventCooldownManager();
 
-    private static boolean isDebug = false;
-
+    private static boolean isDebug = true;
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void registerEvent(DynamicEvent event) {
         REGISTERED_EVENTS.put(event.getId(), event);
@@ -45,6 +47,7 @@ public class DynamicEventManager {
 
         for (ServerPlayer player : players) {
             if (COOLDOWN_MANAGER.isOnCooldown(player)) continue;
+
             if (!data.shouldTickForPlayer(player.getUUID().toString())) continue;
 
             for (DynamicEvent event : REGISTERED_EVENTS.values()) {
@@ -53,6 +56,7 @@ public class DynamicEventManager {
                 boolean triggered = tryEventForPlayer(level, data, event, player);
                 if (triggered) {
                     COOLDOWN_MANAGER.triggerCooldown(player);
+                    data.resetTickCounterForPlayer(player.getUUID().toString());
                     break;
                 }
             }
@@ -76,8 +80,12 @@ public class DynamicEventManager {
         double finalChance = currentChance * event.getBiomeModifier(level, targetPos);
 
         if (isDebug) {
-            System.out.println("[SEM] Evaluating event " + event.getId() +
-                    " | chance=" + currentChance + " | roll=" + finalChance);
+            DynamicEventManager.LOGGER.debug(
+                    "[SEM] Evaluating event {} | chance={} | finalChance={}",
+                    event.getId(),
+                    String.format("%.3f", currentChance),
+                    String.format("%.3f", finalChance)
+            );
         }
 
         if (RANDOM.nextDouble() < finalChance) {
@@ -89,9 +97,12 @@ public class DynamicEventManager {
                 data.resetAllChancesForPlayer(playerUUID, bases);
 
                 if (isDebug) {
-                    System.out.println("[SEM] Event TRIGGERED: " + event.getId() + " for player " + player.getName().getString());
+                    DynamicEventManager.LOGGER.debug(
+                            "[SEM] Event TRIGGERED: {} for player {}",
+                            event.getId(),
+                            player.getName().getString()
+                    );
                 }
-
 
                 return true;
             }
