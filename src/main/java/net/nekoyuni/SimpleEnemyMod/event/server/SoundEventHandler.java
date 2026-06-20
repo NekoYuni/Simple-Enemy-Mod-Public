@@ -16,8 +16,11 @@ import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
 import net.nekoyuni.SimpleEnemyMod.network.ModNetworking;
 import net.nekoyuni.SimpleEnemyMod.network.packets.PacketPlayImpactSound;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 @Mod.EventBusSubscriber(modid = SimpleEnemyMod.MODID)
@@ -25,38 +28,33 @@ public class SoundEventHandler {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private static final Map<String, Long> lastSoundTime = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> lastSoundTime = new HashMap<>();
     private static final long MIN_SOUND_INTERVAL_MS = 100;
-    private static final long CLEANUP_INTERVAL = 3000;
+    private static final long CLEANUP_INTERVAL_MS = 3000;
     private static long lastCleanupTime = 0;
+
+    private static final double RANGE_SQ = 64.0 * 64.0;
 
     @SubscribeEvent
     public static void onAmmoHitBlock(AmmoHitBlockEvent event) {
-
-        long currentTime = System.currentTimeMillis();
-
-        if (currentTime - lastCleanupTime > CLEANUP_INTERVAL) {
-            cleanup();
-            lastCleanupTime = currentTime;
-        }
-
-        ServerLevel level = (ServerLevel) event.getLevel();
-        Vec3 impactPos = event.getHitResult().getLocation();
         Entity shooter = event.getAmmo().getOwner();
-
-        // TODO Refactor to this. If is PMC Unit; return
         if (!(shooter instanceof USunitEntity || shooter instanceof RUunitEntity)) {
             return;
         }
 
-        boolean hasNearbyPlayers = level.players().stream()
-                .anyMatch(player -> player.distanceToSqr(impactPos) < 64 * 64);
+        ServerLevel level = (ServerLevel) event.getLevel();
+        Vec3 impactPos = event.getHitResult().getLocation();
 
-        if (!hasNearbyPlayers) {
+        List<ServerPlayer> nearbyPlayers = level.players().stream()
+                .filter(p -> p.distanceToSqr(impactPos) < RANGE_SQ)
+                .collect(Collectors.toList());
+
+        if (nearbyPlayers.isEmpty()) {
             return;
         }
 
-        String locationKey = getLocationKey(impactPos, 2.0);
+        long locationKey = getLocationKeyLong(impactPos, 2.0);
+        long currentTime = System.currentTimeMillis();
         Long lastTime = lastSoundTime.get(locationKey);
 
         if (lastTime != null && (currentTime - lastTime) < MIN_SOUND_INTERVAL_MS) {
@@ -65,57 +63,42 @@ public class SoundEventHandler {
 
         lastSoundTime.put(locationKey, currentTime);
 
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : nearbyPlayers) {
             double distanceSqr = player.distanceToSqr(impactPos);
+            float distance = (float) Math.sqrt(distanceSqr);
+            float normalized = distance / 64.0f;
+            float volume = Math.max(0.1f, 2.5f * (1.0f - normalized * normalized));
+            float pitch = 0.8f + level.random.nextFloat() * 0.4f;
 
-            if (distanceSqr < 64 * 64) {
-                float distance = (float) Math.sqrt(distanceSqr);
-                float volume = Math.max(0.1f, 2.0f - (distance / 64.0f));
-                float pitch = 0.8f + level.random.nextFloat() * 0.4f;
+            PacketPlayImpactSound packet = new PacketPlayImpactSound(
+                    impactPos.x, impactPos.y, impactPos.z,
+                    volume, pitch,
+                    SoundSource.NEUTRAL,
+                    currentTime
+            );
 
-                PacketPlayImpactSound packet = new PacketPlayImpactSound(
-                        impactPos.x,
-                        impactPos.y,
-                        impactPos.z,
-                        volume,
-                        pitch,
-                        SoundSource.NEUTRAL,
-                        currentTime
-                );
-
-                try {
-                    ModNetworking.sendToPlayer(packet, player);
-                    /*
-                     LOGGER.debug("Sound packet sent to player {} at distance {}",
-                            player.getName().getString(), distance);
-                     */
-                } catch (Exception e) {
-                    LOGGER.error("Failed to send sound packet to player {}: {}",
-                            player.getName().getString(), e.getMessage());
-                }
+            try {
+                ModNetworking.sendToPlayer(packet, player);
+            } catch (Exception e) {
+                LOGGER.error("Failed to send sound packet to player {}: {}",
+                        player.getName().getString(), e.getMessage());
             }
+        }
+
+        if (currentTime - lastCleanupTime > CLEANUP_INTERVAL_MS) {
+            cleanup(currentTime);
+            lastCleanupTime = currentTime;
         }
     }
 
-
-    private static String getLocationKey(Vec3 pos, double precision) {
-        int x = (int) (pos.x / precision);
-        int y = (int) (pos.y / precision);
-        int z = (int) (pos.z / precision);
-        return x + ":" + y + ":" + z;
+    private static long getLocationKeyLong(Vec3 pos, double precision) {
+        int x = (int) (pos.x / precision) & 0xFFFFF;
+        int y = (int) (pos.y / precision) & 0xFFF;
+        int z = (int) (pos.z / precision) & 0xFFFFF;
+        return ((long) x << 32) | ((long) y << 20) | z;
     }
 
-
-    public static void cleanup() {
-        long now = System.currentTimeMillis();
-        lastSoundTime.entrySet().removeIf(entry ->
-                now - entry.getValue() > 5000);
-
-        /*
-        LOGGER.debug("Sound cache cleanup completed. Remaining entries: {}",
-                lastSoundTime.size());
-
-         */
+    public static void cleanup(long now) {
+        lastSoundTime.entrySet().removeIf(entry -> now - entry.getValue() > 5000);
     }
-
 }
