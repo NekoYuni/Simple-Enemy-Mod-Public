@@ -20,6 +20,7 @@ public final class CommonConfig {
         EventSpawnConfig.init(builder);
         DropsConfig.init(builder);
         EffectConfig.init(builder);
+        MiscConfig.init(builder);
 
         SPEC = builder.build();
     }
