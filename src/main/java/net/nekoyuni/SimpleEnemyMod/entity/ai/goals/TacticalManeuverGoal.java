@@ -34,6 +34,15 @@ public class TacticalManeuverGoal extends Goal {
     private final double FLANK_SPEED;
     private final double MID_RANGE_SPEED;
 
+    // Performance Patch
+    private int pathRecalcCooldown = 0;
+    private static final int PATH_RECALC_INTERVAL = 20;
+
+    private int flankCalcCooldown = 0;
+    private static final int FLANK_CALC_INTERVAL = 15;
+
+    private Vec3 cachedFlankPos = null;
+
 
     public TacticalManeuverGoal(AbstractUnit unit) {
         this.unit = unit;
@@ -162,52 +171,59 @@ public class TacticalManeuverGoal extends Goal {
         }
     }
 
+    // Patch for better performance
     private void handleFlankingMovement(LivingEntity target) {
-        Vec3 flankPos = calculateCircularFlankPosition(target);
+
+        if (flankCalcCooldown <= 0 || cachedFlankPos == null) {
+            cachedFlankPos = calculateCircularFlankPosition(target);
+            flankCalcCooldown = FLANK_CALC_INTERVAL;
+        } else {
+            flankCalcCooldown--;
+        }
+
+        Vec3 flankPos = cachedFlankPos;
 
         double distToFlankPos = unit.position().distanceTo(flankPos);
         double distToLastTarget = unit.position().distanceTo(lastFlankTarget);
 
-        if (lastFlankTarget.equals(Vec3.ZERO) && flankPos.distanceTo(lastFlankTarget) < 3.0) {
+        if (!lastFlankTarget.equals(Vec3.ZERO) && flankPos.distanceTo(lastFlankTarget) < 3.0) {
             stuckCounter++;
 
             if (stuckCounter >= MAX_STUCK_CHECKS) {
-
-                debug("[ManeuverGoal] LOOP DETECTED for unit " + unit.getId() +
-                        " - Forcing angle skip"
-                );
-
                 float currentAngle = unit.getFlankingAngle();
-                float jumpAngle = 60.0f;
-                currentAngle += (jumpAngle * unit.getFlankingDirection());
-
+                currentAngle += (60.0f * unit.getFlankingDirection());
                 if (currentAngle >= 360.0f) currentAngle -= 360.0f;
                 if (currentAngle < 0.0f) currentAngle += 360.0f;
-
                 unit.setFlankingAngle(currentAngle);
 
-                flankPos = calculateCircularFlankPosition(target);
+                cachedFlankPos = null;
+                flankCalcCooldown = 0;
                 stuckCounter = 0;
+                return;
             }
         } else {
             stuckCounter = 0;
         }
 
         lastFlankTarget = flankPos;
-        unit.getNavigation().moveTo(flankPos.x, flankPos.y, flankPos.z, FLANK_SPEED); // 1.15
 
-        // Logg
-        if (unit.level().getGameTime() % 20 == 0) {
+        boolean destinationChanged = cachedFlankPos != null &&
+                flankPos.distanceTo(cachedFlankPos) > 2.0;
 
-            debug("[ManeuverGoal] Flanking - Unit: " + unit.getId() +
-                    " | Dist to target: " + String.format("%.1f", distToFlankPos) +
-                    " | Stuck counter: " + stuckCounter
-            );
+        if (pathRecalcCooldown <= 0 || destinationChanged) {
+            unit.getNavigation().moveTo(flankPos.x, flankPos.y, flankPos.z, FLANK_SPEED);
+            pathRecalcCooldown = PATH_RECALC_INTERVAL;
+        } else {
+            pathRecalcCooldown--;
         }
+
+        debug("[ManeuverGoal] Flanking - Unit: " + unit.getId() +
+                " | Dist: " + String.format("%.1f", distToFlankPos) +
+                " | Stuck: " + stuckCounter);
 
         if (distToFlankPos < 5.0 || unit.getNavigation().isDone()) {
             unit.setSoldierState(SoldierState.SEEK_COVER);
-
+            cachedFlankPos = null;
         }
     }
 
@@ -342,26 +358,56 @@ public class TacticalManeuverGoal extends Goal {
         return targetPos;
     }
 
+    // Performance Fix - Cache
+    private BlockPos cachedSafePos = null;
+    private Vec3 lastCachedOrigin = null;
+    private static final double CACHE_INVALIDATION_DIST = 4.0;
+
     @Nullable
     private BlockPos findNearestSafePosition(BlockPos target, int searchRadius) {
-        Level level = unit.level();
 
+        Vec3 targetVec = Vec3.atCenterOf(target);
+        if (cachedSafePos != null && lastCachedOrigin != null &&
+                targetVec.distanceTo(lastCachedOrigin) < CACHE_INVALIDATION_DIST) {
+            return cachedSafePos;
+        }
+
+        Level level = unit.level();
         for (int r = 0; r <= searchRadius; r++) {
+
             for (int dx = -r; dx <= r; dx++) {
+
                 for (int dz = -r; dz <= r; dz++) {
                     if (Math.abs(dx) != r && Math.abs(dz) != r && r > 0) continue;
-
                     BlockPos candidate = target.offset(dx, 0, dz);
 
                     if (level.getBlockState(candidate).isAir() &&
                             level.getBlockState(candidate.above()).isAir() &&
                             level.getBlockState(candidate.below()).isSolidRender(level, candidate.below())) {
+                        cachedSafePos = candidate;
+                        lastCachedOrigin = targetVec;
+
                         return candidate;
                     }
                 }
+
             }
+
         }
+
+        cachedSafePos = null;
+        lastCachedOrigin = targetVec;
         return null;
+    }
+
+    @Override
+    public void stop() {
+        unit.getNavigation().stop();
+        cachedFlankPos = null;
+        cachedSafePos = null;
+        lastCachedOrigin = null;
+        pathRecalcCooldown = 0;
+        flankCalcCooldown = 0;
     }
 
     private static void debug(String message, Object... args) {
