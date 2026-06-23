@@ -8,14 +8,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.nekoyuni.SimpleEnemyMod.SimpleEnemyMod;
-import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.RangedGunAttackGoal;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
-import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.mojang.text2speech.Narrator.LOGGER;
 
 
 @Mod.EventBusSubscriber(modid = SimpleEnemyMod.MODID)
@@ -43,26 +39,8 @@ public class FriendlyFireEventHandler {
                     victim.getClass().getSimpleName(), attacker.getClass().getSimpleName()
             );
 
-            // RUunit vs RUunit
-            if (victim instanceof RUunitEntity && attacker instanceof RUunitEntity) {
-                LOGGER.info(" -> FRIENDLY FIRE DETECTED (RU vs RU) via TACZ Event! Cancelling event.");
-                event.setCanceled(true);
-                return;
-            }
-
-            // USunit vs USunit
-            if (victim instanceof USunitEntity && attacker instanceof USunitEntity) {
-                info(" -> FRIENDLY FIRE DETECTED (US vs US) via TACZ Event! Cancelling event.");
-                event.setCanceled(true);
-                return;
-            }
-
-            if (victim instanceof PmcUnitEntity && attacker instanceof PmcUnitEntity) {
-                event.setCanceled(true);
-                return;
-            }
-
-            if (victim instanceof Player && attacker instanceof PmcUnitEntity) {
+            if (UnitFactionTags.isFriendlyFire(victim, attacker)) {
+                debug(" -> FRIENDLY FIRE DETECTED via entity type tags! Cancelling event.");
                 event.setCanceled(true);
             }
 
