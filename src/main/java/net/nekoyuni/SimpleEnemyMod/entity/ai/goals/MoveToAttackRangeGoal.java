@@ -6,6 +6,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
 
 import java.util.EnumSet;
 
@@ -82,8 +83,7 @@ public class MoveToAttackRangeGoal extends Goal {
 
     @Override
     public void start() {
-        PathNavigation navigation = mob.getNavigation();
-        navigation.moveTo(target, speed);
+        TacticalNavigationHelper.moveTo(mob, target, speed);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class MoveToAttackRangeGoal extends Goal {
 
         PathNavigation navigation = mob.getNavigation();
         if (!navigation.isInProgress() || navigation.getTargetPos() == null) {
-            navigation.moveTo(target, speed);
+            TacticalNavigationHelper.moveTo(mob, target, speed);
         }
 
         if (mob.tickCount % 10 == 0) {
@@ -119,7 +119,7 @@ public class MoveToAttackRangeGoal extends Goal {
 
                 double distanceToNavTarget = Math.sqrt(navigation.getTargetPos().distSqr(target.blockPosition()));
                 if (distanceToNavTarget > 5.0) {
-                    navigation.moveTo(target, speed);
+                    TacticalNavigationHelper.moveTo(mob, target, speed);
                 }
 
             }

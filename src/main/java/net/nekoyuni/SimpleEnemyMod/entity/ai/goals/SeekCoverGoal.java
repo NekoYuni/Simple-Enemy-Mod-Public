@@ -14,6 +14,10 @@ import net.minecraft.world.phys.Vec3;
 
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.LadderRouteNavigator;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.NavigationSoftObstacleHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalHazardHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -58,6 +62,11 @@ public class SeekCoverGoal extends Goal {
             return false;
         }
 
+        if (isVerticalTransitionInProgress()) {
+            this.cooldownTicks = 30;
+            return false;
+        }
+
         LivingEntity target = mob.getTarget();
         Vec3 dangerPos = null;
 
@@ -73,6 +82,14 @@ public class SeekCoverGoal extends Goal {
         return this.targetCover != null;
     }
 
+    private boolean isVerticalTransitionInProgress() {
+        if (mob.onClimbable() || !mob.onGround()) {
+            return true;
+        }
+        String ladderState = LadderRouteNavigator.debugState(unit);
+        return ladderState != null && !"IDLE".equals(ladderState) && !ladderState.startsWith("FAILED_COOLDOWN");
+    }
+
     @Override
     public void start() {
         if (this.targetCover == null) return;
@@ -85,7 +102,7 @@ public class SeekCoverGoal extends Goal {
             mob.getNavigation().stop();
         } else {
             // Cobertura al frente o lado: pathfinding normal
-            mob.getNavigation().moveTo(
+            TacticalNavigationHelper.moveTo(mob,
                     targetCover.getX() + 0.5,
                     targetCover.getY(),
                     targetCover.getZ() + 0.5,
@@ -223,28 +240,32 @@ public class SeekCoverGoal extends Goal {
                 for (int dz = -r; dz <= r; dz++) {
                     if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
 
-                    BlockPos candidate = origin.offset(dx, 0, dz);
-                    BlockState state = level.getBlockState(candidate);
+                    for (int dy = -1; dy <= 1; dy++) {
+                        BlockPos candidate = origin.offset(dx, dy, dz);
+                        BlockState state = level.getBlockState(candidate);
 
-                    if (!state.isSolidRender(level, candidate)) continue;
+                        if (state.getCollisionShape(level, candidate).isEmpty()) continue;
+                        if (TacticalHazardHelper.isHazardousState(state)) continue;
+                        if (NavigationSoftObstacleHelper.isBreakableNavigationSoftCover(state)) continue;
 
-                    Vec3 blockCenter = Vec3.atCenterOf(candidate);
+                        Vec3 blockCenter = Vec3.atCenterOf(candidate);
 
-                    HitResult hit = level.clip(new ClipContext(
-                            targetEyes,
-                            blockCenter,
-                            ClipContext.Block.COLLIDER,
-                            ClipContext.Fluid.NONE,
-                            mob
-                    ));
+                        HitResult hit = level.clip(new ClipContext(
+                                targetEyes,
+                                blockCenter,
+                                ClipContext.Block.COLLIDER,
+                                ClipContext.Fluid.NONE,
+                                mob
+                        ));
 
-                    if (hit.getType() != HitResult.Type.BLOCK) continue;
+                        if (hit.getType() != HitResult.Type.BLOCK) continue;
 
-                    BlockPos standPos = findStandableAdjacent(level, candidate, origin);
-                    if (standPos == null) continue;
+                        BlockPos standPos = findStandableAdjacent(level, candidate, origin);
+                        if (standPos == null) continue;
 
-                    if (mob.getNavigation().createPath(standPos, 1) != null) {
-                        return standPos;
+                        if (mob.getNavigation().createPath(standPos, 1) != null) {
+                            return standPos;
+                        }
                     }
                 }
             }
@@ -276,7 +297,7 @@ public class SeekCoverGoal extends Goal {
         BlockState head = level.getBlockState(pos.above());
         BlockState floor = level.getBlockState(pos.below());
 
-        return feet.isAir() && head.isAir() && floor.isSolidRender(level, pos.below());
+        return TacticalHazardHelper.isSafeStandable(level, pos);
     }
 }
 

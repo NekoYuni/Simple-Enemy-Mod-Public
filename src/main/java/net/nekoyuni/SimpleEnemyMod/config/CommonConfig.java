@@ -16,6 +16,7 @@ public final class CommonConfig {
 
         AiDifficultyConfig.init(builder);
         AiShootingConfig.init(builder);
+        TacticalAiConfig.init(builder);
 
         EventSpawnConfig.init(builder);
         DropsConfig.init(builder);

@@ -18,9 +18,12 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.config.CommonConfig;
 import net.nekoyuni.SimpleEnemyMod.config.common.UnitAttributesConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.LadderRouteNavigator;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.NavigationSoftObstacleHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.IRoleHolder;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.entity.client.animation.core.IAnimatedEntity;
@@ -101,6 +104,13 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         if (this.getNavigation() instanceof GroundPathNavigation groundNav) {
             groundNav.setCanOpenDoors(true);
         }
+
+        this.setPathfindingMalus(BlockPathTypes.LAVA, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, -1.0F);
+        this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
     }
 
     @Override
@@ -185,6 +195,9 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
             if (currentTicks > 0) {
                 this.entityData.set(DAMAGE_ANIMATION_TICKS, currentTicks - 1);
             }
+
+            LadderRouteNavigator.tickUnit(this);
+            NavigationSoftObstacleHelper.tickTraversalSupport(this);
 
             LivingEntity target = getTarget();
 

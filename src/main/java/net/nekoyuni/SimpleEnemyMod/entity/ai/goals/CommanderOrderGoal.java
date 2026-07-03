@@ -7,6 +7,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.utils.FormationUtils;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalHazardHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.ICommandableMob;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.OrderType;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
@@ -181,7 +183,7 @@ public class CommanderOrderGoal extends Goal {
                     finalMoveTarget = owner.position();
                 }
 
-                this.mob.getNavigation().moveTo(finalMoveTarget.x, finalMoveTarget.y, finalMoveTarget.z, this.speedModifier);
+                TacticalNavigationHelper.moveTo(this.mob, finalMoveTarget, this.speedModifier);
             }
         }
     }
@@ -244,17 +246,18 @@ public class CommanderOrderGoal extends Goal {
         }
 
         if (myIndex == 0) {
-            Vec3 finalTarget = this.commandable.getMoveToTarget();
+            Vec3 finalTarget = snapMoveOrderToBlockCenter(this.commandable.getMoveToTarget());
             if (finalTarget == Vec3.ZERO) return;
 
             double distSqr = this.mob.distanceToSqr(finalTarget);
-            if (distSqr < 2.5D) {
+            if (distSqr < 0.08D) {
                 this.mob.getNavigation().stop();
+                this.mob.setPos(finalTarget.x, finalTarget.y, finalTarget.z);
 
             } else {
                 if (--this.timeToRecalcPath <= 0) {
-                    this.timeToRecalcPath = 20;
-                    this.mob.getNavigation().moveTo(finalTarget.x, finalTarget.y, finalTarget.z, this.speedModifier);
+                    this.timeToRecalcPath = 8;
+                    TacticalNavigationHelper.moveTo(this.mob, finalTarget, this.speedModifier);
                 }
             }
 
@@ -272,17 +275,26 @@ public class CommanderOrderGoal extends Goal {
                 );
                 if (--this.timeToRecalcPath <= 0) {
                     this.timeToRecalcPath = 10;
-                    this.mob.getNavigation().moveTo(targetPos.x, targetPos.y, targetPos.z, this.speedModifier);
+                    TacticalNavigationHelper.moveTo(this.mob, targetPos, this.speedModifier);
                 }
             } else {
 
-                Vec3 finalTarget = this.commandable.getMoveToTarget();
+                Vec3 finalTarget = snapMoveOrderToBlockCenter(this.commandable.getMoveToTarget());
+                if (finalTarget == Vec3.ZERO) return;
                 if (--this.timeToRecalcPath <= 0) {
                     this.timeToRecalcPath = 20;
-                    this.mob.getNavigation().moveTo(finalTarget.x, finalTarget.y, finalTarget.z, this.speedModifier);
+                    TacticalNavigationHelper.moveTo(this.mob, finalTarget, this.speedModifier);
                 }
             }
         }
+    }
+
+    private Vec3 snapMoveOrderToBlockCenter(Vec3 target) {
+        if (target == null || target == Vec3.ZERO) {
+            return Vec3.ZERO;
+        }
+        BlockPos block = BlockPos.containing(target);
+        return Vec3.atBottomCenterOf(block);
     }
 
     private PmcUnitEntity findPointMan() {
@@ -304,7 +316,9 @@ public class CommanderOrderGoal extends Goal {
         boolean feetBlocked = isBlocked(blockPos);
         boolean headBlocked = isBlocked(blockPos.above());
 
-        return !feetBlocked && !headBlocked;
+        return !feetBlocked && !headBlocked
+                && !TacticalHazardHelper.isHazardous(this.mob.level(), blockPos)
+                && !TacticalHazardHelper.isHazardous(this.mob.level(), blockPos.below());
     }
 
     private boolean isBlocked(BlockPos pos) {
