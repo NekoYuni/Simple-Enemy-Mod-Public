@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.phys.AABB;
+import net.nekoyuni.SimpleEnemyMod.config.common.TacticalAiConfig;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.sensing.TacticalLineOfSightHelper;
 
 import javax.annotation.Nullable;
@@ -13,13 +14,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Nearest-target goal with the same vertical search behavior as the current repository, but with
- * target acquisition decoupled from vanilla LoS when tactical LoS is enabled.
+ * Nearest-target goal with tactical line-of-sight and lightweight target-priority rules.
  *
- * This matters for glass: vanilla Minecraft sensing treats glass/panes as LoS blockers, while the
- * public AI branch treats them as transparent/breakable tactical clutter. The goal therefore keeps
- * vanilla-like target eligibility checks, disables only vanilla LoS, and then applies
- * TacticalLineOfSightHelper explicitly.
+ * <p>Target acquisition remains intentionally conservative: distance is the first priority, then tactical LoS.
+ * While already engaged, the goal periodically scans only the close-threat radius and can switch to a much closer
+ * visible hostile. This gives CQB threats priority without introducing the full Phase 5 target scoring model yet.</p>
  */
 public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAttackableTargetGoal<T> {
 
@@ -33,6 +32,7 @@ public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAtta
 
     private int tacticalUnseenTicks;
     private int tacticalUnseenMemoryTicks = 60;
+    private long nextCloseThreatScanTick;
 
     public VerticalAwareTargetGoal(Mob mob, Class<T> targetClass, boolean mustSee, double verticalRange) {
         this(mob, targetClass, mustSee, verticalRange, null);
@@ -58,7 +58,7 @@ public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAtta
             return false;
         }
 
-        this.target = this.findNearestTacticalTarget();
+        this.target = this.findNearestTacticalTarget(this.getFollowDistance(), MAX_TACTICAL_LOS_CANDIDATES);
         return this.target != null;
     }
 
@@ -72,6 +72,8 @@ public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAtta
         if (currentTarget == null || !this.isValidBaseTarget(currentTarget)) {
             return false;
         }
+
+        maybeSwitchToCloseThreat(currentTarget);
 
         if (this.tacticalMustSee) {
             boolean visible = TacticalLineOfSightHelper.canSeeForTargeting(this.mob, currentTarget, true);
@@ -90,12 +92,14 @@ public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAtta
     @Override
     public void start() {
         this.tacticalUnseenTicks = 0;
+        this.nextCloseThreatScanTick = 0L;
         super.start();
     }
 
     @Override
     public void stop() {
         this.tacticalUnseenTicks = 0;
+        this.nextCloseThreatScanTick = 0L;
         super.stop();
     }
 
@@ -106,17 +110,50 @@ public class VerticalAwareTargetGoal<T extends LivingEntity> extends NearestAtta
         return this;
     }
 
+    private void maybeSwitchToCloseThreat(LivingEntity currentTarget) {
+        if (!TacticalAiConfig.enableDistanceTargetPriority()) {
+            return;
+        }
+
+        long now = this.mob.level().getGameTime();
+        if (now < this.nextCloseThreatScanTick) {
+            return;
+        }
+        this.nextCloseThreatScanTick = now + Math.max(1, TacticalAiConfig.closeThreatSwitchScanIntervalTicks());
+
+        double closeRange = Math.max(1.0D, TacticalAiConfig.closeThreatSwitchDistance());
+        T closeThreat = this.findNearestTacticalTarget(closeRange, 12);
+        if (closeThreat == null || closeThreat == currentTarget) {
+            return;
+        }
+
+        double currentDistanceSq = this.mob.distanceToSqr(currentTarget);
+        double candidateDistanceSq = this.mob.distanceToSqr(closeThreat);
+        double closeRangeSq = closeRange * closeRange;
+        double ratio = TacticalAiConfig.closeThreatSwitchRatio();
+
+        boolean currentIsFar = currentDistanceSq > closeRangeSq;
+        boolean candidateIsMuchCloser = candidateDistanceSq < currentDistanceSq * ratio;
+        boolean currentNotVisible = this.tacticalMustSee && !TacticalLineOfSightHelper.canSeeForTargeting(this.mob, currentTarget, true);
+
+        if (currentIsFar || candidateIsMuchCloser || currentNotVisible) {
+            this.mob.setTarget(closeThreat);
+            this.target = closeThreat;
+            this.tacticalUnseenTicks = 0;
+        }
+    }
+
     @Nullable
-    private T findNearestTacticalTarget() {
-        double followRange = this.getFollowDistance();
-        AABB searchArea = this.getTargetSearchArea(followRange);
+    private T findNearestTacticalTarget(double horizontalRange, int maxLosCandidates) {
+        double range = Math.max(1.0D, Math.min(horizontalRange, this.getFollowDistance()));
+        AABB searchArea = this.getTargetSearchArea(range);
         List<T> candidates = this.mob.level().getEntitiesOfClass(this.targetClass, searchArea, this::isValidBaseTarget);
 
         candidates.sort(Comparator.comparingDouble(candidate -> this.mob.distanceToSqr(candidate)));
 
         int tacticalLosChecks = 0;
         for (T candidate : candidates) {
-            if (tacticalLosChecks++ >= MAX_TACTICAL_LOS_CANDIDATES) {
+            if (tacticalLosChecks++ >= Math.max(1, maxLosCandidates)) {
                 break;
             }
 

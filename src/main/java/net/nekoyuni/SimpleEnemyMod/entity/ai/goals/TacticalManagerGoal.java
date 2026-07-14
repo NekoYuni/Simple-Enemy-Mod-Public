@@ -4,11 +4,17 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.config.AIDifficultySettings;
+import net.nekoyuni.SimpleEnemyMod.config.common.TacticalAiConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.decision.CombatDecisionContext;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.decision.TacticalCombatState;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.orders.OrderType;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.sensing.TacticalLineOfSightHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.PmcUnitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.StrategyType;
+import net.nekoyuni.SimpleEnemyMod.scenario.SemScenarioRuntimeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +87,35 @@ public class TacticalManagerGoal extends Goal {
 
         LivingEntity target = unit.getTarget();
 
+        // Phase 2 cover movement is goal-owned once SEEK_COVER has an active movement lock.
+        // Do not release the lock just because vanilla/scenario targeting retargeted to a
+        // different enemy in the same fight; SeekCoverGoal can tolerate short-range threat
+        // updates and will abort only when no valid replacement threat remains.
+        if (unit.getSoldierState() == SoldierState.SEEK_COVER && unit.isMovementLockedByManager()) {
+            // Once SeekCoverGoal owns movement, do not collapse to IDLE during a one-tick
+            // target reassignment gap. The cover goal keeps its own selected threat and can
+            // decide whether that threat is still relevant; the manager should only stop
+            // interfering until no live target/reference remains.
+            LivingEntity coverThreat = null;
+            if (target != null && target.isAlive() && target.level() == unit.level()) {
+                coverThreat = target;
+            } else if (lastTarget != null && lastTarget.isAlive() && lastTarget.level() == unit.level()) {
+                coverThreat = lastTarget;
+            }
+
+            if (coverThreat != null) {
+                if (target != null && target != lastTarget) {
+                    isForcedRush = false;
+                    lastTarget = target;
+                }
+                if (unit.isFlankingActive()) {
+                    unit.setFlankingActive(false);
+                    logDecision("COVER MOVE: suspending flank while cover goal owns movement");
+                }
+                return;
+            }
+        }
+
         if (target != lastTarget) {
             isForcedRush = false;
             unit.releaseMovementLock();
@@ -93,6 +128,31 @@ public class TacticalManagerGoal extends Goal {
 
         if (target == null || !target.isAlive() || target.level() != unit.level()) {
             isForcedRush = false;
+
+            // Phase 4 squad memory: if nearby allies recently shared a hostile position, do not immediately
+            // collapse to IDLE. Keep the unit in SEARCH briefly so TacticalInvestigateSoundGoal / normal
+            // navigation logic can use the shared last-known position.
+            if (time % 10L == Math.floorMod(unit.getId(), 10)) {
+                unit.updateCombatDecisionContext(null, false, 0.0D);
+            }
+            Vec3 sharedEnemy = unit.getSharedEnemyPosition();
+            if (sharedEnemy != null && unit.getSquadContext().hasFreshSharedEnemyMemory(TacticalAiConfig.squadMemoryTicks())) {
+                unit.setLastKnownTargetPos(sharedEnemy);
+                if (unit.getSoldierState() != SoldierState.SEARCH && unit.getSoldierState() != SoldierState.SEEK_COVER) {
+                    unit.setSoldierState(SoldierState.SEARCH);
+                    unit.releaseMovementLock();
+                    SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                            "SQUAD_MEMORY_SEARCH",
+                            unit,
+                            "pos=" + String.format(java.util.Locale.ROOT, "%.2f,%.2f,%.2f", sharedEnemy.x, sharedEnemy.y, sharedEnemy.z)
+                                    + " age=" + unit.getSquadContext().sharedEnemyAgeTicks()
+                                    + " source=" + unit.getSquadContext().memorySource()
+                    );
+                }
+                lastTarget = null;
+                unit.setFlankingActive(false);
+                return;
+            }
 
             if (unit.getSoldierState() != SoldierState.IDLE) {
                 unit.setSoldierState(SoldierState.IDLE);
@@ -112,9 +172,10 @@ public class TacticalManagerGoal extends Goal {
         lastTarget = target;
 
         double distance = unit.distanceTo(target);
-        boolean hasLOS = unit.hasLineOfSight(target);
+        boolean hasLOS = hasTacticalLineOfSight(target);
         boolean isLowHealth = (unit.getHealth() / unit.getMaxHealth()) < RETREAT_HEALTH_PCT;
         SoldierState currentState = unit.getSoldierState();
+        CombatDecisionContext tacticalDecision = unit.updateCombatDecisionContext(target, hasLOS, distance);
 
         if (hasLOS) {
             unit.setLastKnownTargetPos(target.position());
@@ -137,6 +198,10 @@ public class TacticalManagerGoal extends Goal {
             return;
         }
 
+        if (applyPhase4TacticalDecision(target, time, hasLOS, distance, currentState, tacticalDecision)) {
+            return;
+        }
+
         // Strategy
         StrategyType idealStrategy = calculateIdealStrategy(distance, hasLOS);
 
@@ -155,6 +220,71 @@ public class TacticalManagerGoal extends Goal {
         }
     }
 
+
+    private boolean applyPhase4TacticalDecision(LivingEntity target, long time, boolean hasLOS, double distance,
+                                                   SoldierState currentState, CombatDecisionContext decision) {
+        if (!TacticalAiConfig.enableTacticalDecisionLayer() || decision == null) {
+            return false;
+        }
+
+        TacticalCombatState tacticalState = unit.getTacticalCombatState();
+
+        if ((tacticalState == TacticalCombatState.RETREAT || tacticalState == TacticalCombatState.COVER)
+                && currentState != SoldierState.HOLD_COVER
+                && currentState != SoldierState.SEEK_COVER) {
+            if (unit.isFlankingActive()) {
+                unit.setFlankingActive(false);
+            }
+            unit.setCoverSearchOrigin(unit.blockPosition());
+            unit.setSoldierState(SoldierState.SEEK_COVER);
+            unit.lockMovementForManager(TacticalAiConfig.tacticalDecisionCoverLockTicks());
+            SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                    "TACTICAL_DECISION",
+                    unit,
+                    "action=seek_cover tacticalState=" + tacticalState.name()
+                            + " pressure=" + String.format(java.util.Locale.ROOT, "%.2f", decision.threatPressure())
+                            + " confidence=" + String.format(java.util.Locale.ROOT, "%.2f", decision.combatConfidence())
+                            + " distance=" + String.format(java.util.Locale.ROOT, "%.1f", distance)
+                            + " los=" + hasLOS
+            );
+            return true;
+        }
+
+        if (tacticalState == TacticalCombatState.AMBUSH && !hasLOS && currentState != SoldierState.SEEK_COVER) {
+            if (currentState != SoldierState.HOLD_COVER) {
+                unit.setSoldierState(SoldierState.HOLD_COVER);
+                unit.lockMovementForManager(Math.max(30, TacticalAiConfig.tacticalDecisionCoverLockTicks() / 2));
+                SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                        "TACTICAL_DECISION",
+                        unit,
+                        "action=hold_ambush pressure=" + String.format(java.util.Locale.ROOT, "%.2f", decision.threatPressure())
+                                + " confidence=" + String.format(java.util.Locale.ROOT, "%.2f", decision.combatConfidence())
+                );
+            }
+            return true;
+        }
+
+        if (tacticalState == TacticalCombatState.PUSH
+                && hasLOS
+                && !unit.isMovementLockedByManager()
+                && distance > ENGAGE_DIST_MID
+                && currentState != SoldierState.SEEK_COVER) {
+            unit.setSoldierState(SoldierState.TACTICAL_MOV);
+            unit.releaseMovementLock();
+            if (time % 40L == 0L) {
+                SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                        "TACTICAL_DECISION",
+                        unit,
+                        "action=push pressure=" + String.format(java.util.Locale.ROOT, "%.2f", decision.threatPressure())
+                                + " confidence=" + String.format(java.util.Locale.ROOT, "%.2f", decision.combatConfidence())
+                                + " distance=" + String.format(java.util.Locale.ROOT, "%.1f", distance)
+                );
+            }
+            return false;
+        }
+
+        return false;
+    }
 
     private StrategyType calculateIdealStrategy(double distance, boolean hasLOS) {
 
@@ -270,7 +400,7 @@ public class TacticalManagerGoal extends Goal {
             }
 
             if (rushTarget != null) {
-                unit.getNavigation().moveTo(rushTarget.x, rushTarget.y, rushTarget.z, RUSH_SPEED);
+                TacticalNavigationHelper.moveTo(unit, rushTarget.x, rushTarget.y, rushTarget.z, RUSH_SPEED);
                 unit.setSoldierState(SoldierState.TACTICAL_MOV);
 
                 logDecision("FLANK TIMEOUT → ACTIVATING FORCED RUSH to " +
@@ -376,6 +506,10 @@ public class TacticalManagerGoal extends Goal {
     }
 
 
+    private boolean hasTacticalLineOfSight(LivingEntity target) {
+        return TacticalLineOfSightHelper.hasFoliageTransparentLineOfSight(unit, target);
+    }
+
     private void logDecision(String reason) {
 
         if (!isDebug) return;
@@ -386,7 +520,7 @@ public class TacticalManagerGoal extends Goal {
 
         LivingEntity target = unit.getTarget();
         double dist = (target != null) ? unit.distanceTo(target) : -1;
-        boolean hasLos = (target != null) && unit.hasLineOfSight(target);
+        boolean hasLos = (target != null) && hasTacticalLineOfSight(target);
 
         LOGGER.debug(
                 "[SEM-AI] T:{} | U:{} | St:{} | Str:{} | Flk:{}(T:{}) | Rush:{} | D:{} | LoS:{} | Ago:{} | {}",

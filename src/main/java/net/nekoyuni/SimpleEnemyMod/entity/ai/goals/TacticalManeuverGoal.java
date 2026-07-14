@@ -6,6 +6,10 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.config.AIDifficultySettings;
+import net.nekoyuni.SimpleEnemyMod.config.common.TacticalAiConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalHazardHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.sensing.TacticalLineOfSightHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.StrategyType;
@@ -84,14 +88,14 @@ public class TacticalManeuverGoal extends Goal {
         boolean isMyTurn = (currentTime % 5) == staggerOffset;
 
         if (!isMyTurn) {
-            if (unit.hasLineOfSight(target)) {
+            if (hasTacticalLineOfSight(target)) {
                 unit.getLookControl().setLookAt(target, 30.0F, 30.0F);
             }
             return;
         }
 
         SoldierState state = unit.getSoldierState();
-        boolean hasLOS = unit.hasLineOfSight(target);
+        boolean hasLOS = hasTacticalLineOfSight(target);
 
         // HOLD ANGLE
         if (pauseTicks > 0) {
@@ -120,7 +124,7 @@ public class TacticalManeuverGoal extends Goal {
 
         // Tactical move without Flanking
         if (state == SoldierState.TACTICAL_MOV) {
-            unit.getNavigation().moveTo(target, 1.25);
+            TacticalNavigationHelper.moveTo(unit, target, 1.25 * unit.getTacticalSpeedMultiplier());
             return;
         }
 
@@ -166,8 +170,11 @@ public class TacticalManeuverGoal extends Goal {
                 movement = applyWallBias(movement);
             }
 
-            unit.getNavigation().moveTo(movement.x, movement.y, movement.z, speed);
-            unit.setLastMicroMoveTick(unit.level().getGameTime());
+            movement = resolveSafeMovementTarget(movement);
+            if (movement != null) {
+                TacticalNavigationHelper.moveTo(unit, movement.x, movement.y, movement.z, speed * unit.getTacticalSpeedMultiplier());
+                unit.setLastMicroMoveTick(unit.level().getGameTime());
+            }
         }
     }
 
@@ -211,7 +218,7 @@ public class TacticalManeuverGoal extends Goal {
                 flankPos.distanceTo(cachedFlankPos) > 2.0;
 
         if (pathRecalcCooldown <= 0 || destinationChanged) {
-            unit.getNavigation().moveTo(flankPos.x, flankPos.y, flankPos.z, FLANK_SPEED);
+            TacticalNavigationHelper.moveTo(unit, flankPos.x, flankPos.y, flankPos.z, FLANK_SPEED * unit.getTacticalSpeedMultiplier());
             pathRecalcCooldown = PATH_RECALC_INTERVAL;
         } else {
             pathRecalcCooldown--;
@@ -381,9 +388,8 @@ public class TacticalManeuverGoal extends Goal {
                     if (Math.abs(dx) != r && Math.abs(dz) != r && r > 0) continue;
                     BlockPos candidate = target.offset(dx, 0, dz);
 
-                    if (level.getBlockState(candidate).isAir() &&
-                            level.getBlockState(candidate.above()).isAir() &&
-                            level.getBlockState(candidate.below()).isSolidRender(level, candidate.below())) {
+                    if (TacticalHazardHelper.isSafeStandable(level, candidate)
+                            && (!TacticalAiConfig.enableCoverPathValidation() || unit.getNavigation().createPath(candidate, 1) != null)) {
                         cachedSafePos = candidate;
                         lastCachedOrigin = targetVec;
 
@@ -398,6 +404,26 @@ public class TacticalManeuverGoal extends Goal {
         cachedSafePos = null;
         lastCachedOrigin = targetVec;
         return null;
+    }
+
+    @Nullable
+    private Vec3 resolveSafeMovementTarget(Vec3 movement) {
+        if (movement == null) {
+            return null;
+        }
+
+        BlockPos candidate = BlockPos.containing(movement);
+        if (TacticalHazardHelper.isSafeStandable(unit.level(), candidate)
+                && (!TacticalAiConfig.enableCoverPathValidation() || unit.getNavigation().createPath(candidate, 1) != null)) {
+            return movement;
+        }
+
+        BlockPos safe = findNearestSafePosition(candidate, 4);
+        return safe == null ? null : Vec3.atCenterOf(safe);
+    }
+
+    private boolean hasTacticalLineOfSight(LivingEntity target) {
+        return TacticalLineOfSightHelper.hasFoliageTransparentLineOfSight(unit, target);
     }
 
     @Override

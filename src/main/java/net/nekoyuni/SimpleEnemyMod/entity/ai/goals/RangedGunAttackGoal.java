@@ -14,7 +14,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.goals.utils.AiGunSpreadHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.sensing.TacticalLineOfSightHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.awareness.CombatSoundAwarenessManager;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.suppression.CombatSuppressionManager;
 import net.nekoyuni.SimpleEnemyMod.config.common.TacticalAiConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.EnumSet;
@@ -392,10 +395,14 @@ public class RangedGunAttackGoal extends Goal {
         float distance = (float) eyePos.distanceTo(targetCenter);
         RandomSource random = this.mob.getRandom();
 
-        float finalPitch = AiGunSpreadHelper.CalculateSpread(basePitch, distance, this.BASE_SPREAD_DEGREES,
+        float suppressionSpreadPenalty = this.mob instanceof AbstractUnit unit
+                ? unit.getSuppressionSpreadPenalty()
+                : 0.0F;
+
+        float finalPitch = AiGunSpreadHelper.CalculateSpread(basePitch, distance, this.BASE_SPREAD_DEGREES + suppressionSpreadPenalty,
                 this.SPREAD_INCREASE_PER_BLOCK, random);
 
-        float finalYaw = AiGunSpreadHelper.CalculateSpread(baseYaw, distance, this.BASE_SPREAD_DEGREES,
+        float finalYaw = AiGunSpreadHelper.CalculateSpread(baseYaw, distance, this.BASE_SPREAD_DEGREES + suppressionSpreadPenalty,
                 this.SPREAD_INCREASE_PER_BLOCK, random);
 
 
@@ -405,6 +412,18 @@ public class RangedGunAttackGoal extends Goal {
 
         switch (shootResult) {
             case SUCCESS:
+                CombatSoundAwarenessManager.emitGunshot(
+                        this.mob.level(),
+                        this.mob,
+                        this.mob.position(),
+                        TacticalAiConfig.gunshotHearingRadius()
+                );
+                CombatSuppressionManager.emitGunfireSuppression(
+                        this.mob.level(),
+                        this.mob,
+                        targetCenter,
+                        TacticalAiConfig.suppressionImpactRadius()
+                );
                 this.burstShotsFired++;
                 trace(ANSI_GREEN +
                         "[AI AttackGoal] Successful shot! Burst {}/{}",

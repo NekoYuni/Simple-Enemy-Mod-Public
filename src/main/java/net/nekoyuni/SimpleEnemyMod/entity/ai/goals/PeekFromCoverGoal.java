@@ -12,6 +12,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalHazardHelper;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.sensing.TacticalLineOfSightHelper;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -44,7 +45,7 @@ public class PeekFromCoverGoal extends Goal {
 
         LivingEntity target = mob.getTarget();
         if (target == null || !target.isAlive()) return false;
-        if (mob.hasLineOfSight(target)) return false;
+        if (hasTacticalLineOfSight(target)) return false;
 
         if (cooldownTicks > 0) {
             cooldownTicks--;
@@ -87,7 +88,7 @@ public class PeekFromCoverGoal extends Goal {
 
         mob.getLookControl().setLookAt(target, 30f, 30f);
 
-        if (mob.hasLineOfSight(target)) {
+        if (hasTacticalLineOfSight(target)) {
             stop();
             return;
         }
@@ -165,9 +166,12 @@ public class PeekFromCoverGoal extends Goal {
     }
 
     private boolean isSafe(Level level, BlockPos pos) {
-        BlockPos below = pos.below();
-
         return TacticalHazardHelper.isSafeStandable(level, pos);
     }
+
+    private boolean hasTacticalLineOfSight(LivingEntity target) {
+        return TacticalLineOfSightHelper.hasFoliageTransparentLineOfSight(mob, target);
+    }
 }
+
 

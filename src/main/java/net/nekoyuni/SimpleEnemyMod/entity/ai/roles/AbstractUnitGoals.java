@@ -31,6 +31,7 @@ public abstract class AbstractUnitGoals implements IRoleGoals {
                 AiShootingConfig.MIN_BURST_COOLDOWN.get(),
                 AiShootingConfig.MAX_BURST_COOLDOWN.get()
         ));
+        entity.goalSelector.addGoal(7, new TacticalInvestigateSoundGoal((AbstractUnit) entity));
 
         entity.goalSelector.addGoal(8, new LookAtPlayerGoal(entity, Player.class, 8.0F));
         entity.goalSelector.addGoal(9, new RandomLookAroundGoal(entity));

@@ -127,6 +127,7 @@ dependencies {
     // Mod Compatibility Test
     runtimeOnly fg.deobf("curse.maven:lesraisins-armor-1021131:7343690")
     runtimeOnly fg.deobf("curse.maven:fracture-point-1207137:6386643")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
 
 }
 

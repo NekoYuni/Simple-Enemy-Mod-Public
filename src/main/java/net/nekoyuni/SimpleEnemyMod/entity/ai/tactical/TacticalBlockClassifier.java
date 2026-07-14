@@ -2,17 +2,19 @@ package net.nekoyuni.SimpleEnemyMod.entity.ai.tactical;
 
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 
 import java.util.Locale;
 
 /**
- * Central block classification for the neutral Phase 1 tactical AI helpers.
+ * Central block classification for neutral tactical AI helpers.
  *
- * Keeping glass, foliage, fragile plants and hazards in one place prevents visibility,
- * traversal and later cover logic from drifting apart.
+ * Visibility, traversal and cover logic must agree on what is glass, foliage,
+ * fragile navigation clutter, real cover and environmental hazard.
  */
 public final class TacticalBlockClassifier {
 
@@ -43,6 +45,37 @@ public final class TacticalBlockClassifier {
         return isGlassLike(state)
                 || state.is(BlockTags.LEAVES)
                 || isFragilePlantLike(state);
+    }
+
+    /**
+     * Soft cover can conceal or obstruct movement, but it must not be scored as real ballistic cover.
+     */
+    public static boolean isSoftCover(BlockState state) {
+        return isVisionTransparentClutter(state) || isBreakableNavigationSoftCover(state);
+    }
+
+    public static boolean isHardCover(BlockState state, Level level, BlockPos pos) {
+        if (state.isAir() || isSoftCover(state) || isHazardousState(state)) {
+            return false;
+        }
+
+        return state.isSolidRender(level, pos) || !state.getCollisionShape(level, pos).isEmpty();
+    }
+
+    public static double hardCoverStrength(BlockState state, Level level, BlockPos pos) {
+        if (!isHardCover(state, level, pos)) {
+            return 0.0D;
+        }
+        if (state.is(Blocks.OBSIDIAN) || state.is(Blocks.CRYING_OBSIDIAN) || state.is(Blocks.ANCIENT_DEBRIS)) {
+            return 1.0D;
+        }
+        if (state.isSolidRender(level, pos)) {
+            return 0.82D;
+        }
+        if (!state.getCollisionShape(level, pos).isEmpty()) {
+            return 0.58D;
+        }
+        return 0.20D;
     }
 
     public static boolean isHazardousState(BlockState state) {

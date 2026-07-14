@@ -1,29 +1,29 @@
 package net.nekoyuni.SimpleEnemyMod.entity.ai.goals;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-
+import net.nekoyuni.SimpleEnemyMod.config.common.TacticalAiConfig;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.LadderRouteNavigator;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.ai.tactical.TacticalCoverFinder;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.SoldierState;
-import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.LadderRouteNavigator;
-import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.NavigationSoftObstacleHelper;
-import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalHazardHelper;
-import net.nekoyuni.SimpleEnemyMod.entity.ai.navigation.TacticalNavigationHelper;
+import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
+import net.nekoyuni.SimpleEnemyMod.scenario.SemScenarioRuntimeManager;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-
 public class SeekCoverGoal extends Goal {
+
+    private static final int PROGRESS_SAMPLE_INTERVAL_TICKS = 10;
+    private static final int STALL_RECOVERY_THRESHOLD_TICKS = 40;
+    private static final int MAX_STALL_REPATH_ATTEMPTS = 1;
+    private static final double MIN_POSITION_PROGRESS_SQR = 0.04D;
+    private static final double MIN_TARGET_PROGRESS = 0.10D;
 
     private final AbstractUnit unit;
     private final Mob mob;
@@ -31,12 +31,30 @@ public class SeekCoverGoal extends Goal {
     private final int searchRadius;
     private int cooldownTicks = 0;
     private boolean abortedByManager = false;
+    private String abortReason = "none";
 
-    // Backward strafe system
-    private boolean isBackwardCover = false;
+    private boolean targetIsCover = false;
+    private boolean targetIsEvasion = false;
+    private boolean movementAbortRequested = false;
+    private int progressSampleTicks = 0;
+    private int stalledTicks = 0;
+    private int repathAttempts = 0;
+    private double lastDistanceToTarget = Double.MAX_VALUE;
 
     @Nullable
-    private BlockPos targetCover;
+    private Vec3 lastProgressPosition;
+
+    @Nullable
+    private BlockPos targetPosition;
+
+    @Nullable
+    private TacticalCoverFinder.CoverSearchResult lastSearchResult;
+
+    @Nullable
+    private LivingEntity selectedThreat;
+
+    @Nullable
+    private Vec3 selectedThreatPosition;
 
     public SeekCoverGoal(AbstractUnit unit, double speed, int searchRadius) {
         this.unit = unit;
@@ -48,7 +66,6 @@ public class SeekCoverGoal extends Goal {
 
     @Override
     public boolean canUse() {
-
         if (!unit.isMovementLockedByManager()) {
             return false;
         }
@@ -63,23 +80,47 @@ public class SeekCoverGoal extends Goal {
         }
 
         if (isVerticalTransitionInProgress()) {
-            this.cooldownTicks = 30;
+            this.cooldownTicks = Math.max(20, TacticalAiConfig.coverSearchCooldownTicks());
             return false;
         }
 
         LivingEntity target = mob.getTarget();
-        Vec3 dangerPos = null;
-
-        if (target != null) {
-            dangerPos = target.getEyePosition();
-        } else if (unit.getLastKnownTargetPos() != null) {
-            dangerPos = unit.getLastKnownTargetPos();
+        if (target == null || !target.isAlive()) {
+            return false;
         }
 
-        if (dangerPos == null) return false;
-        this.targetCover = findCoverPosition(dangerPos);
+        if (!TacticalCoverFinder.tryAcquireCoverSearchSlot(unit)) {
+            int jitter = Math.max(1, TacticalAiConfig.coverSearchBudgetJitterTicks());
+            this.cooldownTicks = 1 + Math.floorMod(unit.getId(), jitter);
+            return false;
+        }
 
-        return this.targetCover != null;
+        this.selectedThreat = target;
+        this.selectedThreatPosition = target.position();
+        this.lastSearchResult = TacticalCoverFinder.findCoverOrEvasion(unit, target, this.searchRadius);
+        if (this.lastSearchResult == null || !this.lastSearchResult.hasPosition()) {
+            SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                    "COVER_SEARCH_FAILED",
+                    unit,
+                    "radius=" + this.searchRadius + " cooldown=" + TacticalAiConfig.coverSearchCooldownTicks()
+            );
+            this.selectedThreat = null;
+            this.selectedThreatPosition = null;
+            this.cooldownTicks = TacticalAiConfig.coverSearchCooldownTicks();
+            return false;
+        }
+
+        this.targetPosition = this.lastSearchResult.position();
+        this.targetIsCover = this.lastSearchResult.isCover();
+        this.targetIsEvasion = this.lastSearchResult.isEvasion();
+        SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                this.targetIsCover ? "COVER_SELECTED" : "EVASION_SELECTED",
+                unit,
+                "mode=" + this.lastSearchResult.mode()
+                        + " score=" + String.format(java.util.Locale.ROOT, "%.2f", this.lastSearchResult.score())
+                        + " pos=" + this.targetPosition
+        );
+        return true;
     }
 
     private boolean isVerticalTransitionInProgress() {
@@ -92,212 +133,352 @@ public class SeekCoverGoal extends Goal {
 
     @Override
     public void start() {
-        if (this.targetCover == null) return;
-
-        // Calculamos si la cobertura está a la espalda del NPC
-        this.isBackwardCover = isCoverBehindUnit();
-
-        if (this.isBackwardCover) {
-            // Cobertura a la espalda: detenemos pathfinding, el tick() maneja el strafe
-            mob.getNavigation().stop();
-        } else {
-            // Cobertura al frente o lado: pathfinding normal
-            TacticalNavigationHelper.moveTo(mob,
-                    targetCover.getX() + 0.5,
-                    targetCover.getY(),
-                    targetCover.getZ() + 0.5,
-                    this.speed
-            );
+        if (this.targetPosition == null) {
+            this.movementAbortRequested = true;
+            this.abortReason = "missing_target_position";
+            return;
         }
+
+        // Once a cover move has been accepted, this goal owns movement until it reaches cover,
+        // the selected threat changes, or the manager changes the soldier state. Public scenario
+        // logs showed that short manager lock TTLs can expire while a valid cover path is still
+        // being followed, causing false COVER_ABORTED events. Keep the lock alive locally instead
+        // of treating lock expiry as an external manager abort.
+        refreshMovementOwnership();
+        resetProgressWatchdog(true);
+
+        // Always let PathNavigation own terrain traversal. The former backward-strafe branch
+        // stopped navigation and continuously drove MoveControl.strafe(), which cannot negotiate
+        // one-block height changes and could walk forever against a block edge during combat.
+        boolean pathStarted = startNavigationToTarget();
+        if (!pathStarted) {
+            this.movementAbortRequested = true;
+            this.abortReason = "initial_path_failed";
+        }
+
+        SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                this.targetIsCover ? "COVER_MOVE_START" : "EVASION_MOVE_START",
+                unit,
+                "pos=" + this.targetPosition
+                        + " speed=" + String.format(java.util.Locale.ROOT, "%.2f", this.speed)
+                        + " pathStarted=" + pathStarted
+        );
     }
 
     @Override
     public boolean canContinueToUse() {
-
-        if (!unit.isMovementLockedByManager()) {
-            abortedByManager = true;
+        if (this.targetPosition == null) {
+            this.abortedByManager = true;
+            this.abortReason = "missing_target_position";
             return false;
         }
 
-        if (unit.getSoldierState() != SoldierState.SEEK_COVER || this.targetCover == null) {
+        if (this.movementAbortRequested) {
             return false;
         }
 
-        // Si es backward strafe, chequeamos distancia manualmente
-        if (this.isBackwardCover) {
-            return !mob.blockPosition().closerThan(this.targetCover, 1.5);
+        LivingEntity currentThreat = mob.getTarget();
+
+        if (unit.getSoldierState() != SoldierState.SEEK_COVER) {
+            // Target acquisition can briefly clear/reassign the mob target while a valid
+            // cover path is already in progress. TacticalManagerGoal may therefore see
+            // a transient no-target tick and set IDLE even though the original threat is
+            // still alive. Treat this as a recoverable manager hiccup, not a cover abort.
+            if (unit.getSoldierState() == SoldierState.IDLE && hasRelevantThreat(currentThreat)) {
+                unit.setSoldierState(SoldierState.SEEK_COVER);
+                refreshMovementOwnership();
+            } else {
+                this.abortedByManager = true;
+                this.abortReason = "state_changed_to_" + unit.getSoldierState();
+                return false;
+            }
         }
 
-        return !mob.getNavigation().isDone();
+        if (!hasRelevantThreat(currentThreat)) {
+            this.abortedByManager = false;
+            this.abortReason = "threat_unavailable";
+            return false;
+        }
+
+        refreshMovementOwnership();
+
+        if (hasReachedTarget()) {
+            return false;
+        }
+
+        // Ladder fallback can temporarily stop vanilla navigation while the active ladder route
+        // manually drives motion, so do not interpret navigation.isDone() as failure during a
+        // non-idle ladder route.
+        if (isVerticalTransitionInProgress()) {
+            return true;
+        }
+
+        if (mob.getNavigation().isDone()) {
+            if (tryRecoverNavigation("navigation_done_before_reach")) {
+                return true;
+            }
+            this.abortReason = "navigation_done_before_reach";
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public void stop() {
+        boolean reachedTarget = !abortedByManager
+                && this.targetPosition != null
+                && hasReachedTarget();
 
-        boolean reachedCover = !abortedByManager &&
-                this.targetCover != null &&
-                mob.blockPosition().closerThan(this.targetCover, 2.5);
-
-        if (reachedCover) {
+        if (reachedTarget && this.targetIsCover) {
             unit.setSoldierState(SoldierState.HOLD_COVER);
-            unit.setCoverBlock(this.targetCover);
+            unit.setCoverBlock(this.targetPosition);
+            SemScenarioRuntimeManager.get().logTrackedEntityEvent("COVER_REACHED", unit, "pos=" + this.targetPosition);
+        } else if (reachedTarget && this.targetIsEvasion) {
+            unit.setSoldierState(SoldierState.ENGAGE);
+            SemScenarioRuntimeManager.get().logTrackedEntityEvent("EVASION_REACHED", unit, "pos=" + this.targetPosition);
+        } else if (this.targetPosition != null) {
+            SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                    this.targetIsCover ? "COVER_ABORTED" : "EVASION_ABORTED",
+                    unit,
+                    "pos=" + this.targetPosition
+                            + " abortedByManager=" + abortedByManager
+                            + " reason=" + abortReason
+                            + " distance=" + String.format(java.util.Locale.ROOT, "%.2f", Math.sqrt(distanceToTargetCenterSqr()))
+                            + " repathAttempts=" + this.repathAttempts
+            );
         }
 
-        // Limpiamos estado del strafe
-        this.isBackwardCover = false;
+        mob.getNavigation().stop();
+        LadderRouteNavigator.clear(unit);
+
+        this.targetIsCover = false;
+        this.targetIsEvasion = false;
+        this.lastSearchResult = null;
+        this.selectedThreat = null;
+        this.selectedThreatPosition = null;
+        this.lastProgressPosition = null;
+        this.lastDistanceToTarget = Double.MAX_VALUE;
+        this.progressSampleTicks = 0;
+        this.stalledTicks = 0;
+        this.repathAttempts = 0;
+        this.movementAbortRequested = false;
 
         unit.releaseMovementLock();
         abortedByManager = false;
-        this.targetCover = null;
+        abortReason = "none";
+        this.targetPosition = null;
         unit.setCoverSearchOrigin(null);
-        this.cooldownTicks = 20;
+        this.cooldownTicks = TacticalAiConfig.coverSearchCooldownTicks();
     }
 
     @Override
     public void tick() {
-
-        if (this.isBackwardCover) {
-            tickBackwardStrafe();
-            return;
-        }
-
-        // Comportamiento original para cobertura al frente/lado
-        if (this.targetCover != null && mob.getNavigation().isDone()) {
-            this.stop();
-        }
-    }
-
-    /**
-     * Maneja el retroceso táctico cuando la cobertura está a la espalda.
-     * El NPC mantiene la mirada al target y retrocede usando strafe.
-     */
-    private void tickBackwardStrafe() {
-        if (this.targetCover == null) return;
+        refreshMovementOwnership();
 
         LivingEntity target = mob.getTarget();
-
-        // Mantener mirada al target mientras retrocedemos
         if (target != null) {
             mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
         }
 
-        // Aplicar movimiento de retroceso (forward = -1 = hacia atrás relativo a donde mira)
-        mob.getMoveControl().strafe((float) -this.speed, 0.0f);
+        tickProgressWatchdog();
 
-        // Verificar llegada por distancia
-        if (mob.blockPosition().closerThan(this.targetCover, 1.5)) {
-            this.stop();
-        }
+        // Let GoalSelector call stop() after canContinueToUse() becomes false. Calling stop()
+        // manually from tick() can produce double-stop edge cases and stale abort flags.
+    }
+
+    @Override
+    public boolean requiresUpdateEveryTick() {
+        return true;
     }
 
     /**
-     * Determina si la cobertura calculada está a la espalda del NPC.
-     * Compara la dirección que mira el NPC (hacia el target) con la dirección hacia la cobertura.
-     * Si el ángulo entre ambas supera 120°, la cobertura está a sus espaldas.
+     * Cover movement is a short tactical commitment. Vanilla target goals and the SEM
+     * scenario harness can legitimately switch a unit from one enemy to another while it
+     * is already moving to a valid hard-cover position. Treat that as a threat update, not
+     * as a failed cover path, as long as the replacement target is still a valid enemy.
      */
-    private boolean isCoverBehindUnit() {
-        if (this.targetCover == null) return false;
-
-        // Dirección hacia donde mira el NPC (hacia el target o su yRot actual)
-        LivingEntity target = mob.getTarget();
-        Vec3 lookDir;
-
-        if (target != null) {
-            lookDir = new Vec3(
-                    target.getX() - mob.getX(),
-                    0,
-                    target.getZ() - mob.getZ()
-            ).normalize();
-        } else {
-            // Sin target, usamos la rotación actual del NPC
-            float yaw = mob.getYRot() * (float) (Math.PI / 180.0);
-            lookDir = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw));
-        }
-
-        // Dirección hacia la cobertura
-        Vec3 coverDir = new Vec3(
-                targetCover.getX() + 0.5 - mob.getX(),
-                0,
-                targetCover.getZ() + 0.5 - mob.getZ()
-        ).normalize();
-
-        // Producto punto: 1 = misma dirección, -1 = opuesta, 0 = perpendicular
-        double dot = lookDir.dot(coverDir);
-
-        // dot < -0.5 equivale a un ángulo > 120° → cobertura a la espalda
-        return dot < -0.5;
-    }
-
-
-    @Nullable
-    private BlockPos findCoverPosition(Vec3 targetEyes) {
-        Level level = mob.level();
-        BlockPos overridePos = unit.getCoverSearchOrigin();
-        BlockPos origin = (overridePos != null) ? overridePos : mob.blockPosition();
-
-        for (int r = 1; r <= this.searchRadius; r++) {
-            for (int dx = -r; dx <= r; dx++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
-
-                    for (int dy = -1; dy <= 1; dy++) {
-                        BlockPos candidate = origin.offset(dx, dy, dz);
-                        BlockState state = level.getBlockState(candidate);
-
-                        if (state.getCollisionShape(level, candidate).isEmpty()) continue;
-                        if (TacticalHazardHelper.isHazardousState(state)) continue;
-                        if (NavigationSoftObstacleHelper.isBreakableNavigationSoftCover(state)) continue;
-
-                        Vec3 blockCenter = Vec3.atCenterOf(candidate);
-
-                        HitResult hit = level.clip(new ClipContext(
-                                targetEyes,
-                                blockCenter,
-                                ClipContext.Block.COLLIDER,
-                                ClipContext.Fluid.NONE,
-                                mob
-                        ));
-
-                        if (hit.getType() != HitResult.Type.BLOCK) continue;
-
-                        BlockPos standPos = findStandableAdjacent(level, candidate, origin);
-                        if (standPos == null) continue;
-
-                        if (mob.getNavigation().createPath(standPos, 1) != null) {
-                            return standPos;
-                        }
-                    }
-                }
+    private boolean hasRelevantThreat(@Nullable LivingEntity currentThreat) {
+        if (isLivingThreat(this.selectedThreat)) {
+            if (currentThreat != null && currentThreat != this.selectedThreat && isValidReplacementThreat(currentThreat)) {
+                this.selectedThreat = currentThreat;
+                this.selectedThreatPosition = currentThreat.position();
             }
+            return true;
         }
-        return null;
+
+        if (isValidReplacementThreat(currentThreat)) {
+            this.selectedThreat = currentThreat;
+            this.selectedThreatPosition = currentThreat.position();
+            return true;
+        }
+
+        return false;
     }
 
-
-    @Nullable
-    private BlockPos findStandableAdjacent(Level level, BlockPos coverBlock, BlockPos origin) {
-
-        Vec3 dirToOrigin = Vec3.atCenterOf(origin).subtract(Vec3.atCenterOf(coverBlock));
-        Direction preferred = Direction.getNearest(dirToOrigin.x, dirToOrigin.y, dirToOrigin.z);
-
-        if (preferred.getAxis().isHorizontal()) {
-            BlockPos p = coverBlock.relative(preferred);
-            if (isStandable(level, p)) return p;
-        }
-
-        for (var d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
-            BlockPos p = coverBlock.relative(d);
-            if (isStandable(level, p)) return p;
-        }
-        return null;
+    private boolean isLivingThreat(@Nullable LivingEntity threat) {
+        return threat != null
+                && threat.isAlive()
+                && !threat.isRemoved()
+                && threat.level() == mob.level();
     }
 
-    private boolean isStandable(Level level, BlockPos pos) {
-        BlockState feet = level.getBlockState(pos);
-        BlockState head = level.getBlockState(pos.above());
-        BlockState floor = level.getBlockState(pos.below());
+    private boolean isValidReplacementThreat(@Nullable LivingEntity threat) {
+        if (!isLivingThreat(threat) || threat == mob) {
+            return false;
+        }
 
-        return TacticalHazardHelper.isSafeStandable(level, pos);
+        if (!mob.canAttack(threat)) {
+            return false;
+        }
+
+        if (UnitFactionTags.isSameTaggedFaction(unit, threat)) {
+            return false;
+        }
+
+        // If the selected threat disappeared and the unit immediately retargeted another
+        // nearby opponent, finishing the current cover path is usually better than
+        // stutter-cancelling and starting a new expensive cover scan. For very large target
+        // jumps, abort so the next SEEK_COVER pass can score cover against the new axis.
+        if (this.selectedThreatPosition != null && threat.position().distanceToSqr(this.selectedThreatPosition) > 24.0D * 24.0D) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean hasReachedTarget() {
+        if (this.targetPosition == null) {
+            return false;
+        }
+        return distanceToTargetCenterSqr() <= getReachRadius() * getReachRadius();
+    }
+
+    private double distanceToTargetCenterSqr() {
+        if (this.targetPosition == null) {
+            return Double.MAX_VALUE;
+        }
+        double dx = mob.getX() - (this.targetPosition.getX() + 0.5D);
+        double dy = mob.getY() - this.targetPosition.getY();
+        double dz = mob.getZ() - (this.targetPosition.getZ() + 0.5D);
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    private double getReachRadius() {
+        return this.targetIsCover ? 2.5D : 2.0D;
+    }
+
+    private void refreshMovementOwnership() {
+        unit.lockMovementForManager(Math.max(20, TacticalAiConfig.coverSearchCooldownTicks()));
+    }
+
+    private boolean startNavigationToTarget() {
+        if (this.targetPosition == null) {
+            return false;
+        }
+
+        return TacticalNavigationHelper.moveTo(
+                mob,
+                this.targetPosition.getX() + 0.5D,
+                this.targetPosition.getY(),
+                this.targetPosition.getZ() + 0.5D,
+                this.speed
+        );
+    }
+
+    private void tickProgressWatchdog() {
+        if (this.targetPosition == null || this.movementAbortRequested || hasReachedTarget()) {
+            return;
+        }
+
+        // Ladder traversal and ordinary jumps intentionally suspend ground navigation. The
+        // ladder helper owns its own timeout, so sampling here would produce false stalls.
+        if (isVerticalTransitionInProgress()) {
+            resetProgressWatchdog(false);
+            return;
+        }
+
+        if (++this.progressSampleTicks < PROGRESS_SAMPLE_INTERVAL_TICKS) {
+            return;
+        }
+        this.progressSampleTicks = 0;
+
+        Vec3 currentPosition = mob.position();
+        double currentDistance = Math.sqrt(distanceToTargetCenterSqr());
+        if (this.lastProgressPosition == null || this.lastDistanceToTarget == Double.MAX_VALUE) {
+            this.lastProgressPosition = currentPosition;
+            this.lastDistanceToTarget = currentDistance;
+            return;
+        }
+
+        boolean positionProgress = currentPosition.distanceToSqr(this.lastProgressPosition) >= MIN_POSITION_PROGRESS_SQR;
+        boolean targetProgress = currentDistance <= this.lastDistanceToTarget - MIN_TARGET_PROGRESS;
+
+        if (positionProgress || targetProgress) {
+            this.stalledTicks = 0;
+        } else {
+            this.stalledTicks += PROGRESS_SAMPLE_INTERVAL_TICKS;
+        }
+
+        this.lastProgressPosition = currentPosition;
+        this.lastDistanceToTarget = currentDistance;
+
+        if (this.stalledTicks < STALL_RECOVERY_THRESHOLD_TICKS) {
+            return;
+        }
+
+        if (tryRecoverNavigation("no_progress")) {
+            return;
+        }
+
+        this.movementAbortRequested = true;
+        this.abortReason = this.repathAttempts >= MAX_STALL_REPATH_ATTEMPTS
+                ? "stalled_after_repath"
+                : "stalled_repath_failed";
+        SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                this.targetIsCover ? "COVER_STALL_ABORT" : "EVASION_STALL_ABORT",
+                unit,
+                "pos=" + this.targetPosition
+                        + " distance=" + String.format(java.util.Locale.ROOT, "%.2f", currentDistance)
+                        + " reason=" + this.abortReason
+        );
+    }
+
+    private boolean tryRecoverNavigation(String reason) {
+        if (this.targetPosition == null || this.repathAttempts >= MAX_STALL_REPATH_ATTEMPTS) {
+            return false;
+        }
+
+        this.repathAttempts++;
+        mob.getNavigation().stop();
+        LadderRouteNavigator.clear(unit);
+        boolean pathStarted = startNavigationToTarget();
+
+        SemScenarioRuntimeManager.get().logTrackedEntityEvent(
+                this.targetIsCover ? "COVER_REPATH" : "EVASION_REPATH",
+                unit,
+                "pos=" + this.targetPosition
+                        + " attempt=" + this.repathAttempts
+                        + " reason=" + reason
+                        + " pathStarted=" + pathStarted
+        );
+
+        if (pathStarted) {
+            resetProgressWatchdog(false);
+        }
+        return pathStarted;
+    }
+
+    private void resetProgressWatchdog(boolean resetRepathAttempts) {
+        this.progressSampleTicks = 0;
+        this.stalledTicks = 0;
+        this.lastProgressPosition = mob.position();
+        this.lastDistanceToTarget = this.targetPosition == null
+                ? Double.MAX_VALUE
+                : Math.sqrt(distanceToTargetCenterSqr());
+        if (resetRepathAttempts) {
+            this.repathAttempts = 0;
+            this.movementAbortRequested = false;
+        }
     }
 }
-
