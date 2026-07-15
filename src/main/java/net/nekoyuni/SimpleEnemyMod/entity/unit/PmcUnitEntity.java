@@ -364,6 +364,21 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
         }
     }
 
+    @Override
+    public boolean isPreventingPlayerRest(Player player) {
+        return false;
+    }
+
+    // patch: prevent entity returns fire
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (target instanceof Player) {
+            super.setTarget(null);
+            return;
+        }
+        super.setTarget(target);
+    }
+
     // GETTERS AND SETTERS FOR ORDERS
 
     public void setOrder(OrderType order) {

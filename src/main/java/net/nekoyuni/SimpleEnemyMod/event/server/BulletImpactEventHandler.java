@@ -54,7 +54,6 @@ public class BulletImpactEventHandler {
 
             if (!npc.isAlive() || npc == shooter) continue;
             if (!(npc instanceof AbstractUnit)) continue;
-            if (shooter instanceof Player && UnitFactionTags.isPmcUnit(npc)) continue;
             if (UnitFactionTags.isFriendlyFire(npc, shooter)) continue;
 
 
