@@ -58,6 +58,31 @@
   "config.simpleenemymod.ai_shooting.max_burst_cooldown": "Max Burst Cooldown",
   "config.simpleenemymod.ai_shooting.max_burst_cooldown.tooltip": "Maximum cooldown between bursts (ticks)",
 
+  "config.simpleenemymod.cat.tactical": "AI Tactical",
+  "config.simpleenemymod.tactical.enable_soft_obstacle_breaking": "Enable Soft Obstacle Breaking",
+  "config.simpleenemymod.tactical.enable_soft_obstacle_breaking.tooltip": "Allows NPCs to break grass, leaves, and glass while pathfinding.",
+
+  "config.simpleenemymod.tactical.enable_precise_foliage_los": "Enable Precise Foliage Los",
+  "config.simpleenemymod.tactical.enable_precise_foliage_los.tooltip": "Foliage, bushes, and glass will no longer block NPC line-of-sight or shooting.",
+
+  "config.simpleenemymod.tactical.enable_tactical_hearing": "Enable Tactical Hearing",
+  "config.simpleenemymod.tactical.enable_tactical_hearing.tooltip": "Allows units to detect and react to nearby combat sounds.",
+
+  "config.simpleenemymod.tactical.enable_smart_cover_search": "Enable Smart Cover Search",
+  "config.simpleenemymod.tactical.enable_smart_cover_search.tooltip": "NPCs will evaluate and score nearby cover instead of choosing the closest block.",
+
+  "config.simpleenemymod.tactical.enable_squad_combat_memory": "Enable Squad Combat Memory",
+  "config.simpleenemymod.tactical.enable_squad_combat_memory.tooltip": "Shares spotted, heard, or suppressed enemy positions among squad members.",
+
+  "config.simpleenemymod.tactical.enable_tactical_suppression": "Enable Tactical Suppression",
+  "config.simpleenemymod.tactical.enable_tactical_suppression.tooltip": "Units suffer suppression effects from nearby bullet impacts and sustained gunfire.",
+
+  "config.simpleenemymod.tactical.suppression_accuracy_spread_penalty": "Suppression Accuracy Spread Penalty",
+  "config.simpleenemymod.tactical.suppression_accuracy_spread_penalty.tooltip": "Additional weapon spread applied per suppression point under fire.",
+
+  "config.simpleenemymod.tactical.enable_distance_target_priority": "Enable Distance Target Priority",
+  "config.simpleenemymod.tactical.enable_distance_target_priority.tooltip": "NPCs prioritize closer threats when selecting targets.",
+
   "config.simpleenemymod.cat.drops": "Drops",
   "config.simpleenemymod.drops.enable_custom_drops": "Enable Custom Drops",
   "config.simpleenemymod.drops.enable_custom_drops.tooltip": "Enables or disables modified weapon drops for Units.",
