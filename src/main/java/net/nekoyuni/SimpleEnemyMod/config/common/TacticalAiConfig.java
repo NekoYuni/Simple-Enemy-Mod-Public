@@ -73,7 +73,7 @@ public class TacticalAiConfig {
 
         ENABLE_SOFT_OBSTACLE_BREAKING = builder
                 .comment("Allow NPCs to break navigation clutter such as grass, leaves and glass while following a path.")
-                .define("enableSoftObstacleBreaking", true);
+                .define("enableSoftObstacleBreaking", false);
 
         ENABLE_LADDER_FALLBACK = builder
                 .comment("Allow NPCs to use a ladder-aware fallback route when vanilla navigation cannot resolve vertical movement.")
@@ -81,7 +81,7 @@ public class TacticalAiConfig {
 
         ENABLE_PRECISE_FOLIAGE_LOS = builder
                 .comment("Use tactical line-of-sight checks so foliage, bushes, glass and other soft visual clutter do not block target acquisition or firing.")
-                .define("enablePreciseFoliageLos", true);
+                .define("enablePreciseFoliageLos", false);
 
         ENABLE_HAZARDOUS_COVER_REJECTION = builder
                 .comment("Reject tactical movement and cover positions that require standing in dangerous blocks such as lava, fire, cactus or magma.")
