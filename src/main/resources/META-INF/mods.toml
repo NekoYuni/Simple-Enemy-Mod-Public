@@ -14,7 +14,7 @@ displayName="${mod_name}"
 # A file name (in the root of the mod JAR) containing a logo for display
 logoFile="logo.png"
 # A text field displayed in the mod UI
-credits="Guns by TaCZ Team, Skins by Default642172" #optional
+credits="Guns by TaCZ Team, Skins by Default642172, Tactical AI and Tests by Aleksandr Iagofarov"
 # A text field displayed in the mod UI
 
 authors="${mod_authors}"
