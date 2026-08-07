@@ -81,7 +81,6 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
             return;
         }
 
-        // revisar bien, AbstractUnit
         boolean inCombat = !(entity instanceof AbstractUnit unit2) || unit2.isInCombat();
 
         if (inCombat) {
@@ -112,6 +111,9 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
                 buffer,
                 packedLight
         );
+
+        NpcMuzzleFlashRenderer.render(entity, stack, poseStack);
+
     }
 
 
@@ -123,7 +125,6 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.scale(1.0F, -1.0F, -1.0F);
 
-
         itemRenderer.renderItem(
                 entity,
                 stack,
@@ -131,7 +132,8 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
                 false,
                 poseStack,
                 buffer,
-                packedLight);
+                packedLight
+        );
     }
 
 
@@ -154,5 +156,4 @@ public class GunLayerRenderer<T extends LivingEntity, M extends EntityModel<T>>
                 packedLight
         );
     }
-
 }
