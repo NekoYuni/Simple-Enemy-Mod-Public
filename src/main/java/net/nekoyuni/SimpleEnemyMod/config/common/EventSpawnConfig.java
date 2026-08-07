@@ -35,7 +35,7 @@ public class EventSpawnConfig {
                 .defineInRange("eventGlobalCooldownTicks", 4800, 100, 72000);
 
         EVENT_TICK_WINDOW = builder
-                .comment("Ticks between event evaluation attempts per player. 20 ticks = 1 second. Default: 3600 = 1 minute")
+                .comment("Ticks between event evaluation attempts per player. 20 ticks = 1 second. Default: 1200 = 1 minute")
                 .defineInRange("eventTickWindow", 1200, 100, 72000);
 
         // PATROL EVENT

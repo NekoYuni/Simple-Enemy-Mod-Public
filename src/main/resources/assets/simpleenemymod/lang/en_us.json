@@ -110,6 +110,12 @@
   "config.simpleenemymod.spawns.enable_village_garrison.tooltip.2": "When set to false, the event is disabled",
 
   "config.simpleenemymod.cat.spawn_event": "Spawn Events",
+  "config.simpleenemymod.spawn_event.global_cooldown_ticks": "Event Global Cooldown Ticks",
+  "config.simpleenemymod.spawn_event.global_cooldown_ticks.tooltip": "Global cooldown ticks between events. 20 ticks = 1 second. 4800 = 4 minutes",
+
+  "config.simpleenemymod.spawn_event.event_tick_window": "Event Tick Window",
+  "config.simpleenemymod.spawn_event.event_tick_window.tooltip": "Ticks between event evaluation attempts per player. 20 ticks = 1 second. Default: 1200 = 1 minute",
+
   "config.simpleenemymod.spawn_event.patrol_base_chance": "Patrol Base Chance",
   "config.simpleenemymod.spawn_event.patrol_base_chance.tooltip": "Base spawn chance for Patrol Event (per minute)",
 
@@ -131,6 +137,9 @@
   "config.simpleenemymod.cat.unit_attributes": "Unit Attributes",
   "config.simpleenemymod.unit_attributes.max_health": "Unit Max Health",
   "config.simpleenemymod.unit_attributes.max_health.tooltip": "Max Health for All Units",
+
+  "config.simpleenemymod.unit_attributes.armor": "Unit Armor Points",
+  "config.simpleenemymod.unit_attributes.armor.tooltip": "Unit Armor Points for All Units",
 
   "config.simpleenemymod.unit_attributes.walk_speed": "Unit Walk Speed",
   "config.simpleenemymod.unit_attributes.walk_speed.tooltip": "Walk Speed for All Units",

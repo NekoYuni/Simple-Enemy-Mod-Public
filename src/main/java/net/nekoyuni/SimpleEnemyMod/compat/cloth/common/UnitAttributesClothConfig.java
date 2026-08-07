@@ -23,6 +23,16 @@ public class UnitAttributesClothConfig {
                 .build());
 
         attributes.addEntry(entryBuilder.startDoubleField(
+                        Component.translatable("config.simpleenemymod.unit_attributes.armor"),
+                        UnitAttributesConfig.UNIT_ARMOR.get())
+                .setDefaultValue(3.00)
+                .setMin(1.0)
+                .setMax(100.0)
+                .setTooltip(Component.translatable("config.simpleenemymod.unit_attributes.armor.tooltip"))
+                .setSaveConsumer(newValue -> UnitAttributesConfig.UNIT_ARMOR.set(newValue))
+                .build());
+
+        attributes.addEntry(entryBuilder.startDoubleField(
                         Component.translatable("config.simpleenemymod.unit_attributes.walk_speed"),
                         UnitAttributesConfig.UNIT_SPEED.get())
                 .setDefaultValue(0.27)

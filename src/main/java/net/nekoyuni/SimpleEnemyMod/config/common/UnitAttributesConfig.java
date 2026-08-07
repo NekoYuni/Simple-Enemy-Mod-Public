@@ -5,6 +5,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 public class UnitAttributesConfig {
 
     public static ForgeConfigSpec.DoubleValue UNIT_HEALTH;
+    public static ForgeConfigSpec.DoubleValue UNIT_ARMOR;
     public static ForgeConfigSpec.DoubleValue UNIT_SPEED;
     public static ForgeConfigSpec.DoubleValue UNIT_DETECTION_RANGE;
 
@@ -14,6 +15,11 @@ public class UnitAttributesConfig {
         UNIT_HEALTH = builder
                 .comment("Max Health for All Units")
                 .defineInRange("health", 20.0, 1.0, 200.0);
+        builder.comment("--------------------------------------------------");
+
+        UNIT_ARMOR = builder
+                .comment("Unit Armor for All Units")
+                .defineInRange("armor", 3.00, 1.0, 100.0);
         builder.comment("--------------------------------------------------");
 
         UNIT_SPEED = builder
