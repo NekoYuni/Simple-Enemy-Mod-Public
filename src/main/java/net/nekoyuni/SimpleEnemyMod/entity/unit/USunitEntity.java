@@ -89,17 +89,11 @@ public class USunitEntity extends AbstractUnit {
                 this, LivingEntity.class, true, vRange,
                 UnitFactionTags::isRuUnit).setUnseenMemoryTicks(800));
 
-        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
-                this, Zombie.class, true, vRange)); // Testing
-
-        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
-                this, Skeleton.class, true, vRange));
-
         this.targetSelector.addGoal(4, new VerticalAwareTargetGoal<>(
                 this, IronGolem.class, true, vRange));
 
         this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                this, Monster.class, true, vRange, (target) -> {
+                this, LivingEntity.class, true, vRange, (target) -> {
 
             if (UnitFactionTags.isFriendlyToUs(target)) {
                 return false;

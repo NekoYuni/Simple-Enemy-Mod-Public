@@ -226,17 +226,8 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
         }
 
         // Normal Goals
-        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
-                this, Zombie.class, true, vRange, fireFilter));
-
-        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
-                this, Skeleton.class, true, vRange, fireFilter));
-
-        this.targetSelector.addGoal(3, new VerticalAwareTargetGoal<>(
-                this, AbstractIllager.class, true, vRange, fireFilter));
-
         this.targetSelector.addGoal(2, new VerticalAwareTargetGoal<>(
-                this, Monster.class, true, vRange, (target) -> {
+                this, LivingEntity.class, true, vRange, (target) -> {
 
             if (!fireFilter.test(target)) {
                 return false;
