@@ -24,6 +24,16 @@
   "key.category.simpleenemymod.general": "Simple Enemy Mod",
   "key.simpleenemymod.commander_menu": "Open Commander Menu",
 
+  "subtitles.simpleenemymod.sound_bullet_impact": "Bullet Impact",
+
+  "subtitles.simpleenemymod.sound_us_unit_hurt": "US soldier hurts",
+  "subtitles.simpleenemymod.sound_us_unit_death": "US soldier dies",
+  "subtitles.simpleenemymod.sound_us_unit_alert": "US soldier shouts",
+
+  "subtitles.simpleenemymod.sound_ru_unit_hurt": "RU soldier hurts",
+  "subtitles.simpleenemymod.sound_ru_unit_death": "RU soldier dies",
+  "subtitles.simpleenemymod.sound_ru_unit_alert": "RU soldier shouts",
+
   "config.simpleenemymod.cat.render_distance": "Render",
   "config.simpleenemymod.render_distance": "Render Distance",
   "config.simpleenemymod.render_distance.tooltip.1": "Max Render Distance (in Blocks) for Units",
