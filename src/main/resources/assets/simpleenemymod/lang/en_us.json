@@ -39,6 +39,9 @@
   "config.simpleenemymod.render_distance.tooltip.1": "Max Render Distance (in Blocks) for Units",
   "config.simpleenemymod.render_distance.tooltip.2": "Important!!: Render Distance > Detection Range",
 
+  "config.simpleenemymod.render_muzzle_flash": "Enable Muzzle Flash Render",
+  "config.simpleenemymod.render_muzzle_flash.tooltip": "Activate or deactivate the visual Muzzle Flash effect",
+
   "config.simpleenemymod.cat.difficulty": "Difficulty",
   "config.simpleenemymod.difficulty": "AI Difficulty",
   "config.simpleenemymod.difficulty.description": "AI Difficulty preset.\nDoes NOT affect soldiers accuracy. Only affects tactical maneuver timers and movement speeds.\n\nNORMAL: More static soldiers, slower combat pacing.\nADVANCED: More dynamic and aggressive soldiers.",
