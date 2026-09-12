@@ -54,25 +54,17 @@ public class BulletImpactEventHandler {
 
             if (!npc.isAlive() || npc == shooter) continue;
             if (!(npc instanceof AbstractUnit)) continue;
-            if (UnitFactionTags.isFriendlyFire(npc, shooter)) continue;
 
+            if (UnitFactionTags.isFriendlyToNpcFaction(npc, shooter)) continue;
 
             if (npc.getTarget() == null) {
-
                 TacticalReactionManager.queueReaction(() -> {
-
                     if (npc.isAlive()) {
                         npc.setTarget(shooter);
-
-                        // DEBUG
                         npc.setGlowingTag(false);
-
                     }
                 });
-
-
             }
-
         }
     }
 }

@@ -16,6 +16,8 @@ import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.util.UnitFactionTags;
 import net.nekoyuni.SimpleEnemyMod.registry.ModSounds;
 
+import javax.annotation.Nullable;
+
 public class RUunitEntity extends AbstractUnit {
 
     private static final int VARIANT_COUNT = 5;
@@ -124,6 +126,15 @@ public class RUunitEntity extends AbstractUnit {
                 UnitRole.DEFAULT.getGoals().addGoals(this);
                 break;
         }
+    }
+
+    // Patch and Fallback to avoid friendly fire between Players and Config Friendly Factions
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (target != null && UnitFactionTags.isFriendlyToNpcFaction(this, target)) {
+            return;
+        }
+        super.setTarget(target);
     }
 
     @Override
