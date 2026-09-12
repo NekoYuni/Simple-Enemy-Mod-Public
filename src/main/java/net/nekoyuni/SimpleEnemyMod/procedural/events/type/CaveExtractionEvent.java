@@ -10,6 +10,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.unit.AbstractUnit;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.RUunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.unit.USunitEntity;
 import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
+import net.nekoyuni.SimpleEnemyMod.procedural.events.system.ChunkSafetyEvaluator;
 import net.nekoyuni.SimpleEnemyMod.procedural.events.system.DynamicEvent;
 import net.nekoyuni.SimpleEnemyMod.registry.ModEntities;
 
@@ -52,6 +53,10 @@ public class CaveExtractionEvent extends DynamicEvent {
             return false;
         }
 
+        if (ChunkSafetyEvaluator.isPlayerBase(level, cavePos)) {
+            return false;
+        }
+
         int min = EventSpawnConfig.CAVE_MIN_SIZE.get();
         int max = EventSpawnConfig.CAVE_MAX_SIZE.get();
 
@@ -83,7 +88,8 @@ public class CaveExtractionEvent extends DynamicEvent {
                 if (level.isEmptyBlock(testPos) &&
                         level.isEmptyBlock(testPos.above()) &&
                         level.getBlockState(testPos.below()).isSolidRender(level, testPos.below()) &&
-                        !level.canSeeSky(testPos)) {
+                        !level.canSeeSky(testPos) &&
+                        !ChunkSafetyEvaluator.isPlayerBase(level, testPos)) {
                     return testPos;
                 }
             }
