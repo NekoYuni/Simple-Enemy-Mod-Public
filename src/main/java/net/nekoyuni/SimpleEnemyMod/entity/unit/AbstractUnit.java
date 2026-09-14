@@ -535,7 +535,11 @@ public abstract class AbstractUnit extends Monster implements IRoleHolder, IAnim
         if (!TacticalAiConfig.enableTacticalSuppression() || amount <= 0.0F) {
             return false;
         }
-        if (source == this || UnitFactionTags.isFriendlyFire(this, source) || UnitFactionTags.isSameTaggedFaction(this, source)) {
+        if (source == this
+                || UnitFactionTags.isFriendlyFire(this, source)
+                || UnitFactionTags.isSameTaggedFaction(this, source)
+                || (source instanceof LivingEntity living
+                    && UnitFactionTags.isFriendlyToNpcFaction(this, living))) {
             return false;
         }
 

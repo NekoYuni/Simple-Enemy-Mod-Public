@@ -86,7 +86,8 @@ public final class CombatSoundAwarenessManager {
             return false;
         }
         if (source instanceof LivingEntity livingSource) {
-            return listener.canAttack(livingSource);
+            return !UnitFactionTags.isFriendlyToNpcFaction(listener, livingSource)
+                    && listener.canAttack(livingSource);
         }
         return UnitFactionTags.isTaggedUnit(source);
     }

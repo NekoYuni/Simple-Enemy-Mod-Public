@@ -80,7 +80,7 @@ public final class UnitFactionTags {
     }
 
     public static boolean isFriendlyToPmc(LivingEntity target) {
-        return isPmcUnit(target)
+        return target instanceof Player || isPmcUnit(target)
                 || (FactionsConfig.RU_UNITS_FRIENDLY.get() && isRuUnit(target))
                 || (FactionsConfig.US_UNITS_FRIENDLY.get() && isUsUnit(target));
     }

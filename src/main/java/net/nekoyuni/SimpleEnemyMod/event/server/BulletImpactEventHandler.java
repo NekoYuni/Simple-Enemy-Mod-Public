@@ -59,7 +59,11 @@ public class BulletImpactEventHandler {
 
             if (npc.getTarget() == null) {
                 TacticalReactionManager.queueReaction(() -> {
-                    if (npc.isAlive()) {
+                    if (npc.isAlive() && shooter.isAlive()
+                            && npc.level() == shooter.level()
+                            && npc.getTarget() == null
+                            && npc.canAttack(shooter)
+                            && !UnitFactionTags.isFriendlyToNpcFaction(npc, shooter)) {
                         npc.setTarget(shooter);
                         npc.setGlowingTag(false);
                     }

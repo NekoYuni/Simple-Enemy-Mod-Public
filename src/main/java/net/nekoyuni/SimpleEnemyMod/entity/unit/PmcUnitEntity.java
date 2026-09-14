@@ -363,8 +363,8 @@ public class PmcUnitEntity extends AbstractUnit implements ICommandableMob {
     // patch: prevent entity returns fire
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        if (target instanceof Player) {
-            super.setTarget(null);
+        if (target instanceof Player
+                || (target != null && UnitFactionTags.isFriendlyToPmc(target))) {
             return;
         }
         super.setTarget(target);
