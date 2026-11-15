@@ -43,6 +43,10 @@ public class NpcMuzzleFlashRenderer {
 
     private static volatile long lastCleanup = 0L;
 
+
+    private static final ResourceLocation FALLBACK_FLASH =
+            new ResourceLocation("tacz", "textures/flash/common_muzzle_flash.png");
+
     public static void onNpcShoot(int entityId) {
         float randomRot = (float) (Math.random() * 360f);
         FLASH_MAP.put(entityId, new FlashData(System.currentTimeMillis(), randomRot));
@@ -83,6 +87,12 @@ public class NpcMuzzleFlashRenderer {
         TimelessAPI.getGunDisplay(gunStack).ifPresent(display -> {
             MuzzleFlash muzzleFlash = display.getMuzzleFlash();
             if (muzzleFlash == null) return;
+
+            /*
+            if (muzzleFlash.getTexture() == null) {
+                return;
+            }
+            */
 
             BedrockGunModel gunModel = display.getGunModel();
             List<BedrockPart> muzzlePath = gunModel.getMuzzleFlashPosPath();
@@ -167,6 +177,9 @@ public class NpcMuzzleFlashRenderer {
     private static void doRender(MuzzleFlash muzzleFlash, FlashData data, long elapsed) {
         if (data.normal == null || data.pose == null) return;
 
+        ResourceLocation texture = muzzleFlash.getTexture();
+        if (texture == null) texture = FALLBACK_FLASH;
+
         float scale = 0.5f * muzzleFlash.getScale();
         float halfRange = TIME_RANGE / 2.0f;
         if (elapsed < halfRange) {
@@ -187,7 +200,7 @@ public class NpcMuzzleFlashRenderer {
         ps.translate(0, -1, 0); // -1
         FLASH_MODEL.renderToBuffer(
                 ps,
-                bufferSource.getBuffer(RenderType.entityTranslucent(muzzleFlash.getTexture())),
+                bufferSource.getBuffer(RenderType.entityTranslucent(texture)),
                 15728880,
                 655360,
                 1f, 1f, 1f, 1f
@@ -200,7 +213,7 @@ public class NpcMuzzleFlashRenderer {
         ps.translate(0, -0.9, 0); // -0.9
         FLASH_MODEL.renderToBuffer(
                 ps,
-                bufferSource.getBuffer(RenderType.energySwirl(muzzleFlash.getTexture(), 1, 1)),
+                bufferSource.getBuffer(RenderType.energySwirl(texture, 1, 1)),
                 15728880,
                 655360,
                 1f, 1f, 1f, 1f
