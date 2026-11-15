@@ -20,6 +20,7 @@ import net.nekoyuni.SimpleEnemyMod.entity.ai.roles.utils.UnitRole;
 import net.nekoyuni.SimpleEnemyMod.registry.ModEntities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import java.util.List;
 public class VillageGarrisonHandler {
 
     private static final List<PendingGarrison> PENDING_GARRISONS = new ArrayList<>();
-
+    private static final List<PendingGarrison> INCOMING_GARRISONS = Collections.synchronizedList(new ArrayList<>());
 
     private static class PendingGarrison {
         final ServerLevel level;
@@ -58,25 +59,30 @@ public class VillageGarrisonHandler {
         }
         persistentData.putBoolean("sem_garrison_checked", true);
 
-        PENDING_GARRISONS.add(new PendingGarrison((ServerLevel) event.getLevel(), villager.blockPosition(), 100));
+        INCOMING_GARRISONS.add(new PendingGarrison((ServerLevel) event.getLevel(), villager.blockPosition(), 100));
     }
 
     @SubscribeEvent
     public static void onLevelTick(TickEvent.LevelTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.level.isClientSide) return;
 
+        if (!INCOMING_GARRISONS.isEmpty()) {
+            synchronized (INCOMING_GARRISONS) {
+                PENDING_GARRISONS.addAll(INCOMING_GARRISONS);
+                INCOMING_GARRISONS.clear();
+            }
+        }
+
         ServerLevel currentLevel = (ServerLevel) event.level;
+        List<PendingGarrison> toRemove = new ArrayList<>();
 
-        Iterator<PendingGarrison> iterator = PENDING_GARRISONS.iterator();
-        while (iterator.hasNext()) {
-            PendingGarrison task = iterator.next();
-
+        for (PendingGarrison task : PENDING_GARRISONS) {
             if (task.level != currentLevel) continue;
 
             task.delayTicks--;
 
             if (task.delayTicks <= 0) {
-                iterator.remove();
+                toRemove.add(task);
 
                 BlockPos farCorner = task.pos.offset(40, 0, 40);
                 if (!currentLevel.isLoaded(farCorner) || !currentLevel.isLoaded(task.pos)) {
@@ -100,12 +106,14 @@ public class VillageGarrisonHandler {
                 }
             }
         }
+
+        PENDING_GARRISONS.removeAll(toRemove);
     }
 
     private static void spawnGuard(ServerLevel level, BlockPos basePos, boolean isRu) {
         double dx = (level.random.nextDouble() - 0.5) * 8;
         double dz = (level.random.nextDouble() - 0.5) * 8;
-        BlockPos spawnPos = basePos.offset((int)dx, 0, (int)dz);
+        BlockPos spawnPos = basePos.offset((int) dx, 0, (int) dz);
 
         if (!level.isLoaded(spawnPos)) return;
 
